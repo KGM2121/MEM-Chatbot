@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MEM/MIM Course Assistant — HS Pforzheim</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+:root{
+  --bg:#0b0b10;--surface:#12121a;--surface2:#191924;--surface3:#20202e;
+  --border:#252535;--accent:#5b8dee;--accent2:#e06b8b;--accent3:#56c490;
+  --error:#f87171;--warn:#fbbf24;
+  --text:#eeeef8;--muted:#6a6a8a;--dim:#3a3a58;
+  --user-bg:#161628;--bot-bg:#0f0f22;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:10px}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.badge{display:flex;align-items:center;gap:8px;padding:5px 11px;background:linear-gradient(135deg,rgba(91,141,238,.12),rgba(224,107,139,.12));border:1px solid rgba(91,141,238,.25);border-radius:9px}
+.badge .sig{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge .sch{font-size:9px;color:var(--muted)}
+.badge .prg{font-size:11px;color:var(--text);font-weight:500}
+.hdr-r{display:flex;align-items:center;gap:7px}
+.lang-sel{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;padding:5px 24px 5px 9px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236a6a8a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;transition:border-color .2s}
+.lang-sel:focus{border-color:var(--accent)}
+.lang-sel option{background:var(--surface2)}
+.icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:15px;width:31px;height:31px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SETTINGS OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.settings-box{background:var(--surface);border:1px solid var(--border2, #303048);border-radius:16px;padding:24px;width:min(440px,92vw);display:flex;flex-direction:column;gap:14px;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.settings-box h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.settings-box .close-row{display:flex;justify-content:space-between;align-items:center}
+.s-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.s-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;padding:8px 11px;outline:none;transition:border-color .2s}
+.s-input:focus{border-color:var(--accent)}
+.s-input::placeholder{color:var(--dim)}
+.s-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;padding:8px 11px;outline:none;resize:none;min-height:80px;line-height:1.55;transition:border-color .2s}
+.s-textarea:focus{border-color:var(--accent)}
+.s-textarea::placeholder{color:var(--dim)}
+.btn-row{display:flex;gap:8px}
+.btn-prim{flex:1;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-family:'Syne',sans-serif;font-weight:700;padding:9px;cursor:pointer;transition:opacity .2s}
+.btn-prim:hover{opacity:.85}
+.btn-sec{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-family:'Syne',sans-serif;font-weight:600;padding:9px 14px;cursor:pointer;transition:all .2s}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent)}
+.status-msg{font-size:11px;padding:7px 10px;border-radius:7px;display:none}
+.status-msg.ok{display:block;background:rgba(86,196,144,.1);border:1px solid rgba(86,196,144,.3);color:var(--accent3)}
+.status-msg.err{display:block;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--error)}
+.key-hint{font-size:10px;color:var(--muted);line-height:1.5}
+.key-hint a{color:var(--accent);text-decoration:none}
+.key-hint a:hover{text-decoration:underline}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* CHAT */
+.chat{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.msgs{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Welcome */
+.welcome{margin:auto;text-align:center;max-width:480px;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.w-orb{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;margin:0 auto 13px}
+.welcome h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.welcome .sub{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:15px}
+.pills{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:13px}
+.pill{background:rgba(91,141,238,.1);border:1px solid rgba(91,141,238,.2);border-radius:5px;padding:2px 7px;font-size:10px;color:var(--accent)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:left}
+.sq{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:11.5px;color:var(--muted);cursor:pointer;transition:all .2s;line-height:1.45}
+.sq:hover{border-color:var(--accent);color:var(--text);background:rgba(91,141,238,.08)}
+.sq .sq-tag{display:block;font-size:9.5px;color:var(--accent);font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+
+/* Messages */
+.msg{display:flex;gap:8px;animation:fadeUp .2s ease;max-width:86%}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.msg.bot{align-self:flex-start}
+.av{width:28px;height:28px;border-radius:7px;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:10px}
+.msg.user .av{background:var(--surface3);border:1px solid var(--border);color:var(--muted)}
+.msg.bot .av{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.bubble{padding:10px 13px;border-radius:11px;font-size:13px;line-height:1.65;max-width:100%}
+.msg.user .bubble{background:var(--user-bg);border:1px solid var(--border);border-top-right-radius:3px;color:var(--text)}
+.msg.bot .bubble{background:var(--bot-bg);border:1px solid rgba(91,141,238,.2);border-top-left-radius:3px;color:var(--text)}
+.typing{display:flex;gap:4px;align-items:center;padding:3px 0}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 1.1s infinite}
+.typing span:nth-child(2){animation-delay:.18s}
+.typing span:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,60%,100%{opacity:.25;transform:scale(1)}30%{opacity:1;transform:scale(1.3)}}
+
+/* Input bar */
+.ibar{padding:10px 18px 12px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:8px;align-items:flex-end}
+.iw{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:11px;display:flex;align-items:flex-end;padding:9px 12px;transition:border-color .2s}
+.iw:focus-within{border-color:var(--accent)}
+textarea.mi{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:none;max-height:90px;min-height:20px;line-height:1.5}
+textarea.mi::placeholder{color:var(--muted)}
+.send{width:34px;height:34px;border-radius:9px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.send:hover{background:#7aaaff;transform:translateY(-1px)}
+.send:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.send svg{width:14px;height:14px}
+.foot{text-align:center;font-size:10px;color:var(--dim);padding:4px 0 5px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="badge">
+      <div class="sig">HS PF</div>
+      <div>
+        <div class="sch">Hochschule Pforzheim · Fakultät Technik</div>
+        <div class="prg">MEM / MIM Master Programs</div>
+      </div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <select class="lang-sel" id="langSel" onchange="setLang()">
+      <option value="EN">🇬🇧 English</option>
+      <option value="DE">🇩🇪 Deutsch</option>
+      <option value="FR">🇫🇷 Français</option>
+      <option value="ES">🇪🇸 Español</option>
+      <option value="ZH">🇨🇳 中文</option>
+      <option value="HI">🇮🇳 हिन्दी</option>
+      <option value="PT">🇧🇷 Português</option>
+      <option value="AR">🇸🇦 العربية</option>
+      <option value="JA">🇯🇵 日本語</option>
+      <option value="KO">🇰🇷 한국어</option>
+    </select>
+    <button class="icon-btn" onclick="openSettings()" title="Settings">⚙</button>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="settings-box" id="settingsBox">
+    <div class="close-row">
+      <h3 id="s-title">⚙ Settings</h3>
+      <button class="icon-btn" onclick="closeSettings()" style="font-size:18px">×</button>
+    </div>
+
+    <div>
+      <div class="s-label" id="s-key-label">Anthropic API Key</div>
+      <input class="s-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
+      <div class="key-hint" style="margin-top:6px" id="s-key-hint">
+        Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key.<br>
+        Then add $5 credit under Billing so the key works.
+      </div>
+    </div>
+
+    <div>
+      <div class="s-label" id="s-voice-label">Professor Voice (optional)</div>
+      <textarea class="s-textarea" id="voiceArea" rows="4" placeholder="Paste phrases or notes from Prof. Volz's lecture to refine his voice..."></textarea>
+    </div>
+
+    <div class="status-msg" id="statusMsg"></div>
+
+    <div class="btn-row">
+      <button class="btn-prim" onclick="saveSettings()" id="s-save-btn">Save & Test</button>
+      <button class="btn-sec" onclick="closeSettings()" id="s-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="layout">
+  <div class="chat">
+    <div class="msgs" id="msgs">
+      <div class="welcome" id="welcome">
+        <div class="w-orb">MEM</div>
+        <h2 id="w-title">MEM/MIM Course Assistant</h2>
+        <p class="sub" id="w-desc">Ask anything about the MEM/MIM Master programs at Hochschule Pforzheim — modules, professors, grading, career paths, admission and more. Available in 10 languages.</p>
+        <div class="pills" id="w-pills"></div>
+        <div class="sg" id="w-suggestions"></div>
+      </div>
+    </div>
+    <div class="ibar">
+      <div class="iw">
+        <textarea class="mi" id="msgIn" rows="1" onkeydown="onKey(event)" oninput="rsz(this)"></textarea>
+      </div>
+      <button class="send" id="sendBtn" onclick="send()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="foot" id="w-footer">HS Pforzheim · MEM/MIM Course Assistant · Powered by Claude AI</div>
+
+<script>
+// ── DEFAULT API KEY (update via ⚙ Settings without re-uploading) ──
+const DEFAULT_KEY = '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';
+const MODEL = 'claude-sonnet-4-20250514';
+
+// Load saved key from localStorage or fall back to default
+let apiKey = localStorage.getItem('hspf_api_key') || DEFAULT_KEY;
+let voiceExtra = localStorage.getItem('hspf_voice') || '';
+if(voiceExtra) document.getElementById('voiceArea').value = voiceExtra;
+
+// ── TRANSLATIONS (100% complete — every string) ──
+const T = {
+  EN:{
+    ph:'Ask about MEM/MIM courses, modules, professors...',
+    li:'Respond in English.',
+    wTitle:'MEM/MIM Course Assistant',
+    wDesc:'Ask anything about the MEM/MIM Master programs at Hochschule Pforzheim — modules, professors, grading, career paths, admission and more. Available in 10 languages.',
+    footer:'HS Pforzheim · MEM/MIM Course Assistant · Powered by Claude AI',
+    you:'You', bot:'RV',
+    pills:['Leadership','Research Methods','Strategic Procurement','Emerging Tech','Financial Mgmt','Negotiations B2B','Capstone','Future Mobility','Production','KPI Management','Produktstrategie','Restrukturierung'],
+    suggestions:[
+      {tag:'Structure',   text:'What modules are in Semester 1 & 2 of MEM?'},
+      {tag:'Course Info', text:'Who teaches Strategic Procurement?'},
+      {tag:'Assessment',  text:'How is the Capstone graded?'},
+      {tag:'Career',      text:'Career paths after MEM?'},
+      {tag:'Outcomes',    text:'Program learning outcomes?'},
+      {tag:'Admission',   text:'Application deadlines?'},
+    ],
+    settingsTitle:'⚙ Settings',
+    keyLabel:'Anthropic API Key',
+    keyHint:'Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Then add $5 credit under Billing.',
+    voiceLabel:'Professor Voice (optional)',
+    voicePh:"Paste phrases from Prof. Volz's lecture to refine his style...",
+    saveBtn:'Save & Test',
+    cancelBtn:'Cancel',
+    testOk:'✓ API key is working! Settings saved.',
+    testFail:'✗ API key error: ',
+    noKey:'Please enter an API key first.',
+  },
+  DE:{
+    ph:'Fragen zu MEM/MIM Modulen, Professoren, Prüfungen...',
+    li:'Antworte auf Deutsch.',
+    wTitle:'MEM/MIM Kursassistent',
+    wDesc:'Stelle Fragen zu den MEM/MIM Masterstudiengängen der Hochschule Pforzheim — Module, Professoren, Benotung, Karriere, Bewerbung und mehr.',
+    footer:'HS Pforzheim · MEM/MIM Kursassistent · Powered by Claude AI',
+    you:'Du', bot:'RV',
+    pills:['Führung','Forschungsmethoden','Strategischer Einkauf','Neue Technologien','Finanzmanagement','Verhandlungen B2B','Capstone','Zukunftsmobilität','Produktion','Kennzahlen','Produktstrategie','Restrukturierung'],
+    suggestions:[
+      {tag:'Studienaufbau',  text:'Welche Module gibt es in Semester 1 & 2?'},
+      {tag:'Kursinfos',      text:'Wer unterrichtet Strategischen Einkauf?'},
+      {tag:'Prüfung',        text:'Wie wird das Capstone bewertet?'},
+      {tag:'Karriere',       text:'Karrieremöglichkeiten nach dem MEM?'},
+      {tag:'Lernziele',      text:'Was sind die Programmlernziele?'},
+      {tag:'Bewerbung',      text:'Welche Bewerbungsfristen gibt es?'},
+    ],
+    settingsTitle:'⚙ Einstellungen',
+    keyLabel:'Anthropic API-Schlüssel',
+    keyHint:'Schlüssel erhalten unter <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Dann 5 $ Guthaben unter Billing hinzufügen.',
+    voiceLabel:'Professorenstil (optional)',
+    voicePh:'Zitate aus Prof. Volz Vorlesung einfügen...',
+    saveBtn:'Speichern & Testen',
+    cancelBtn:'Abbrechen',
+    testOk:'✓ API-Schlüssel funktioniert! Einstellungen gespeichert.',
+    testFail:'✗ API-Fehler: ',
+    noKey:'Bitte zuerst einen API-Schlüssel eingeben.',
+  },
+  FR:{
+    ph:'Questions sur les cours MEM/MIM, modules, professeurs...',
+    li:'Répondez en français.',
+    wTitle:'Assistant de Cours MEM/MIM',
+    wDesc:'Posez toutes vos questions sur les programmes MEM/MIM de la Hochschule Pforzheim — modules, professeurs, évaluation, carrière, admission et plus.',
+    footer:'HS Pforzheim · Assistant MEM/MIM · Propulsé par Claude AI',
+    you:'Vous', bot:'RV',
+    pills:['Leadership','Méthodes de recherche','Achats stratégiques','Technologies émergentes','Gestion financière','Négociations B2B','Capstone','Mobilité future','Production','KPI','Stratégie produit','Restructuration'],
+    suggestions:[
+      {tag:'Structure',     text:'Quels modules en Semestre 1 & 2 ?'},
+      {tag:'Cours',         text:'Qui enseigne les Achats stratégiques ?'},
+      {tag:'Évaluation',    text:'Comment est noté le Capstone ?'},
+      {tag:'Carrière',      text:'Débouchés après le MEM ?'},
+      {tag:'Objectifs',     text:'Objectifs du programme ?'},
+      {tag:'Admission',     text:'Dates limites de candidature ?'},
+    ],
+    settingsTitle:'⚙ Paramètres',
+    keyLabel:'Clé API Anthropic',
+    keyHint:'Obtenez une clé sur <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Ajoutez ensuite 5 $ de crédit.',
+    voiceLabel:'Style du professeur (optionnel)',
+    voicePh:'Collez des phrases du cours de Prof. Volz...',
+    saveBtn:'Enregistrer & Tester',
+    cancelBtn:'Annuler',
+    testOk:'✓ Clé API valide ! Paramètres enregistrés.',
+    testFail:'✗ Erreur API : ',
+    noKey:'Veuillez d\'abord saisir une clé API.',
+  },
+  ES:{
+    ph:'Preguntas sobre módulos MEM/MIM, profesores...',
+    li:'Responde en español.',
+    wTitle:'Asistente de Cursos MEM/MIM',
+    wDesc:'Haz cualquier pregunta sobre los programas MEM/MIM de la Hochschule Pforzheim — módulos, profesores, notas, carreras, admisión y más.',
+    footer:'HS Pforzheim · Asistente MEM/MIM · Con Claude AI',
+    you:'Tú', bot:'RV',
+    pills:['Liderazgo','Métodos de investigación','Compras estratégicas','Tecnologías emergentes','Gestión financiera','Negociaciones B2B','Capstone','Movilidad futura','Producción','KPI','Estrategia de producto','Reestructuración'],
+    suggestions:[
+      {tag:'Estructura',  text:'¿Qué módulos hay en el Semestre 1 y 2?'},
+      {tag:'Curso',       text:'¿Quién enseña Compras Estratégicas?'},
+      {tag:'Evaluación',  text:'¿Cómo se califica el Capstone?'},
+      {tag:'Carrera',     text:'¿Salidas profesionales tras el MEM?'},
+      {tag:'Objetivos',   text:'¿Objetivos del programa?'},
+      {tag:'Admisión',    text:'¿Plazos de solicitud?'},
+    ],
+    settingsTitle:'⚙ Configuración',
+    keyLabel:'Clave API de Anthropic',
+    keyHint:'Obtén una clave en <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Añade $5 en Billing.',
+    voiceLabel:'Estilo del profesor (opcional)',
+    voicePh:'Pega frases del video del Prof. Volz...',
+    saveBtn:'Guardar y Probar',
+    cancelBtn:'Cancelar',
+    testOk:'✓ ¡Clave API válida! Configuración guardada.',
+    testFail:'✗ Error de API: ',
+    noKey:'Por favor introduce primero una clave API.',
+  },
+  ZH:{
+    ph:'询问MEM/MIM课程、模块、教授相关问题...',
+    li:'请用中文回复。',
+    wTitle:'MEM/MIM 课程助手',
+    wDesc:'关于霍赫舒勒普福尔茨海姆大学MEM/MIM硕士项目的任何问题——模块、教授、评分、职业路径、申请等，均可询问。',
+    footer:'HS Pforzheim · MEM/MIM 课程助手 · 由 Claude AI 驱动',
+    you:'你', bot:'RV',
+    pills:['领导力','研究方法','战略采购','新兴技术','财务管理','B2B谈判','毕业项目','未来出行','工业生产','KPI管理','产品策略','企业重组'],
+    suggestions:[
+      {tag:'课程结构', text:'MEM第1、2学期有哪些模块？'},
+      {tag:'课程信息', text:'谁教战略采购课？'},
+      {tag:'考核方式', text:'毕业项目如何评分？'},
+      {tag:'职业发展', text:'MEM毕业后的职业方向？'},
+      {tag:'学习目标', text:'项目的学习目标是什么？'},
+      {tag:'申请入学', text:'申请截止日期是什么时候？'},
+    ],
+    settingsTitle:'⚙ 设置',
+    keyLabel:'Anthropic API 密钥',
+    keyHint:'前往 <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → 创建密钥。然后在Billing中充值$5。',
+    voiceLabel:'教授风格（可选）',
+    voicePh:'粘贴Prof. Volz讲座中的句子来优化风格...',
+    saveBtn:'保存并测试',
+    cancelBtn:'取消',
+    testOk:'✓ API密钥有效！设置已保存。',
+    testFail:'✗ API错误：',
+    noKey:'请先输入API密钥。',
+  },
+  HI:{
+    ph:'MEM/MIM पाठ्यक्रम, मॉड्यूल, प्रोफेसर के बारे में पूछें...',
+    li:'हिन्दी में उत्तर दें।',
+    wTitle:'MEM/MIM कोर्स असिस्टेंट',
+    wDesc:'HS Pforzheim के MEM/MIM मास्टर प्रोग्राम के बारे में कुछ भी पूछें — मॉड्यूल, प्रोफेसर, ग्रेडिंग, करियर, प्रवेश और अधिक।',
+    footer:'HS Pforzheim · MEM/MIM कोर्स असिस्टेंट · Claude AI द्वारा',
+    you:'आप', bot:'RV',
+    pills:['नेतृत्व','अनुसंधान विधियां','रणनीतिक खरीद','उभरती तकनीक','वित्त प्रबंधन','B2B वार्ता','कैपस्टोन','भविष्य गतिशीलता','उत्पादन','KPI प्रबंधन','उत्पाद रणनीति','पुनर्संरचना'],
+    suggestions:[
+      {tag:'संरचना',    text:'MEM के सेमेस्टर 1 व 2 में कौन से मॉड्यूल हैं?'},
+      {tag:'कोर्स जानकारी', text:'रणनीतिक खरीद कौन पढ़ाते हैं?'},
+      {tag:'मूल्यांकन', text:'कैपस्टोन का मूल्यांकन कैसे होता है?'},
+      {tag:'करियर',     text:'MEM के बाद करियर विकल्प?'},
+      {tag:'उद्देश्य',   text:'प्रोग्राम के सीखने के उद्देश्य?'},
+      {tag:'प्रवेश',    text:'आवेदन की अंतिम तिथि?'},
+    ],
+    settingsTitle:'⚙ सेटिंग्स',
+    keyLabel:'Anthropic API कुंजी',
+    keyHint:'<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> पर जाएं → API Keys → Create Key. Billing में $5 जोड़ें।',
+    voiceLabel:'प्रोफेसर की शैली (वैकल्पिक)',
+    voicePh:'Prof. Volz के लेक्चर से वाक्य यहाँ पेस्ट करें...',
+    saveBtn:'सहेजें और परीक्षण करें',
+    cancelBtn:'रद्द करें',
+    testOk:'✓ API कुंजी काम कर रही है! सेटिंग्स सहेजी गईं।',
+    testFail:'✗ API त्रुटि: ',
+    noKey:'कृपया पहले API कुंजी दर्ज करें।',
+  },
+  PT:{
+    ph:'Perguntas sobre cursos MEM/MIM, módulos, professores...',
+    li:'Responda em português.',
+    wTitle:'Assistente de Cursos MEM/MIM',
+    wDesc:'Faça qualquer pergunta sobre os programas MEM/MIM da Hochschule Pforzheim — módulos, professores, notas, carreiras, admissão e mais.',
+    footer:'HS Pforzheim · Assistente MEM/MIM · Com Claude AI',
+    you:'Você', bot:'RV',
+    pills:['Liderança','Métodos de pesquisa','Compras estratégicas','Tecnologias emergentes','Gestão financeira','Negociações B2B','Capstone','Mobilidade futura','Produção','KPI','Estratégia de produto','Reestruturação'],
+    suggestions:[
+      {tag:'Estrutura',  text:'Que módulos há no Semestre 1 e 2?'},
+      {tag:'Curso',      text:'Quem leciona Compras Estratégicas?'},
+      {tag:'Avaliação',  text:'Como é avaliado o Capstone?'},
+      {tag:'Carreira',   text:'Saídas profissionais após o MEM?'},
+      {tag:'Objetivos',  text:'Objetivos de aprendizagem do programa?'},
+      {tag:'Admissão',   text:'Prazos de candidatura?'},
+    ],
+    settingsTitle:'⚙ Configurações',
+    keyLabel:'Chave API Anthropic',
+    keyHint:'Obtenha em <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Adicione $5 em Billing.',
+    voiceLabel:'Estilo do professor (opcional)',
+    voicePh:'Cole frases do vídeo do Prof. Volz...',
+    saveBtn:'Salvar e Testar',
+    cancelBtn:'Cancelar',
+    testOk:'✓ Chave API válida! Configurações salvas.',
+    testFail:'✗ Erro de API: ',
+    noKey:'Por favor insira uma chave API primeiro.',
+  },
+  AR:{
+    ph:'اسأل عن مقررات MEM/MIM والأساتذة والتقييمات...',
+    li:'أجب باللغة العربية.',
+    wTitle:'مساعد مقررات MEM/MIM',
+    wDesc:'اطرح أي سؤال حول برامج MEM/MIM في جامعة Hochschule Pforzheim — المقررات، الأساتذة، التقييم، المسار المهني، القبول وأكثر.',
+    footer:'HS Pforzheim · مساعد MEM/MIM · مدعوم بـ Claude AI',
+    you:'أنت', bot:'RV',
+    pills:['القيادة','مناهج البحث','المشتريات الاستراتيجية','التقنيات الناشئة','الإدارة المالية','مفاوضات B2B','كابستون','التنقل المستقبلي','الإنتاج','مؤشرات الأداء','استراتيجية المنتج','إعادة الهيكلة'],
+    suggestions:[
+      {tag:'الهيكل',    text:'ما المقررات في الفصل 1 و 2؟'},
+      {tag:'معلومات',   text:'من يدرّس المشتريات الاستراتيجية؟'},
+      {tag:'التقييم',   text:'كيف يُقيَّم مشروع كابستون؟'},
+      {tag:'مهني',      text:'المسارات المهنية بعد MEM؟'},
+      {tag:'الأهداف',   text:'ما أهداف تعلم البرنامج؟'},
+      {tag:'القبول',    text:'مواعيد التقديم؟'},
+    ],
+    settingsTitle:'⚙ الإعدادات',
+    keyLabel:'مفتاح API من Anthropic',
+    keyHint:'احصل على مفتاح من <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. ثم أضف $5 في Billing.',
+    voiceLabel:'أسلوب الأستاذ (اختياري)',
+    voicePh:'الصق عبارات من محاضرة Prof. Volz هنا...',
+    saveBtn:'حفظ واختبار',
+    cancelBtn:'إلغاء',
+    testOk:'✓ مفتاح API يعمل! تم حفظ الإعدادات.',
+    testFail:'✗ خطأ في API: ',
+    noKey:'الرجاء إدخال مفتاح API أولاً.',
+  },
+  JA:{
+    ph:'MEM/MIMの科目、モジュール、教授について質問...',
+    li:'日本語で回答してください。',
+    wTitle:'MEM/MIM コースアシスタント',
+    wDesc:'HS PforzheimのMEM/MIMマスタープログラムについて何でも — モジュール、教授、評価、キャリア、入学など。',
+    footer:'HS Pforzheim · MEM/MIM コースアシスタント · Claude AI搭載',
+    you:'あなた', bot:'RV',
+    pills:['リーダーシップ','研究方法','戦略的調達','新興技術','財務管理','B2B交渉','卒業プロジェクト','未来のモビリティ','生産管理','KPI管理','製品戦略','企業再構築'],
+    suggestions:[
+      {tag:'カリキュラム', text:'MEM第1・2学期のモジュールは？'},
+      {tag:'授業情報',     text:'戦略的調達の担当教授は？'},
+      {tag:'評価',         text:'卒業プロジェクトの評価方法は？'},
+      {tag:'キャリア',     text:'MEM修了後のキャリアは？'},
+      {tag:'学習目標',     text:'プログラムの学習目標は？'},
+      {tag:'入学',         text:'出願締め切りはいつ？'},
+    ],
+    settingsTitle:'⚙ 設定',
+    keyLabel:'Anthropic APIキー',
+    keyHint:'<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key でキーを取得。Billingで$5を追加してください。',
+    voiceLabel:'教授のスタイル（任意）',
+    voicePh:'Prof. Volzの講義から文章を貼り付けてスタイルを調整...',
+    saveBtn:'保存してテスト',
+    cancelBtn:'キャンセル',
+    testOk:'✓ APIキーが有効です！設定を保存しました。',
+    testFail:'✗ APIエラー：',
+    noKey:'先にAPIキーを入力してください。',
+  },
+  KO:{
+    ph:'MEM/MIM 강의, 모듈, 교수에 대해 질문하세요...',
+    li:'한국어로 답변하세요.',
+    wTitle:'MEM/MIM 강의 어시스턴트',
+    wDesc:'HS Pforzheim의 MEM/MIM 석사 프로그램에 대해 모든 것을 물어보세요 — 모듈, 교수, 평가, 진로, 입학 등.',
+    footer:'HS Pforzheim · MEM/MIM 강의 어시스턴트 · Claude AI 기반',
+    you:'당신', bot:'RV',
+    pills:['리더십','연구 방법','전략적 구매','신기술 관리','재무 관리','B2B 협상','캡스톤','미래 모빌리티','산업 생산','KPI 관리','제품 전략','기업 구조조정'],
+    suggestions:[
+      {tag:'커리큘럼', text:'MEM 1학기와 2학기 모듈은?'},
+      {tag:'강의 정보', text:'전략적 구매를 누가 가르치나요?'},
+      {tag:'평가',     text:'캡스톤은 어떻게 평가되나요?'},
+      {tag:'진로',     text:'MEM 후 진로는?'},
+      {tag:'목표',     text:'프로그램 학습 목표는?'},
+      {tag:'입학',     text:'지원 마감일은?'},
+    ],
+    settingsTitle:'⚙ 설정',
+    keyLabel:'Anthropic API 키',
+    keyHint:'<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key에서 키를 받으세요. Billing에서 $5를 추가하세요.',
+    voiceLabel:'교수 스타일 (선택)',
+    voicePh:'Prof. Volz 강의에서 문장을 붙여넣어 스타일 조정...',
+    saveBtn:'저장 및 테스트',
+    cancelBtn:'취소',
+    testOk:'✓ API 키가 유효합니다! 설정이 저장되었습니다.',
+    testFail:'✗ API 오류: ',
+    noKey:'먼저 API 키를 입력하세요.',
+  },
+};
+
+// ── PROF. VOLZ VOICE ──
+const VOLZ_VOICE = `PROFESSOR VOICE: Prof. Dr. Raphael Volz — HS Pforzheim (Professor of Applied Computer Science, Data Science & AI)
+
+PERSONALITY & TONE:
+- Direct, intellectually precise, and confident — speaks like someone who has built real products, not just taught theory
+- Mixes academic rigour with genuine entrepreneurial energy
+- Uses dry wit to make dense technical content digestible
+- Genuinely curious — asks rhetorical questions: "Was bedeutet das eigentlich für die Praxis?", "Haben Sie sich mal gefragt, warum...?"
+- Pragmatic: always connects theory back to what actually works in industry
+- Precise — expects precision from students too
+
+GERMAN TEACHING STYLE:
+- Explains primarily in the response language, mixing in technical terms naturally
+- Uses structured breakdowns: "Erstens... Zweitens... Drittens..." / "First... Second... Third..."
+- Builds from first principles: abstract → concrete → example
+- Phrases: "Das ist eigentlich ganz einfach, wenn man es so betrachtet..." / "Konkret bedeutet das..." / "Ein gutes Beispiel dafür ist..."
+
+ACADEMIC BACKGROUND:
+- PhD summa cum laude from KIT (2004), Web Ontology Reasoning
+- h-index 40, research in data science, AI, machine learning, knowledge graphs, NLP
+- Stresses: reproducibility, good scientific practice, rigour
+- On AI: knowledgeable and critical — knows the difference between hype and substance
+
+ENTREPRENEURIAL EDGE:
+- Founded a technology consultancy (2008), sold to Moonshots GmbH (2022)
+- Built nogago navigation app; established holiday properties in Black Forest
+- Often challenges students: "Wenn Sie das als Startup verfolgen würden, was wäre der erste Schritt?"
+
+CAPSTONE STYLE (his main course MWI10028):
+- Expects ALL knowledge from the program applied, not just one module
+- Pushes back on vague claims: "Was genau meinen Sie damit? Seien Sie konkret."
+- "Eine gute Präsentation erzählt eine Geschichte" — narrative matters
+- High bar: interdisciplinary thinking, clear problem framing, actionable recommendations
+
+RESPONSE FORMAT:
+- Start with core answer directly — no preamble
+- Numbered/bulleted structure for complex answers
+- End with a question or challenge when appropriate
+- Abstract → concrete → example flow`;
+
+// ── KNOWLEDGE BASE ──
+const KB = `
+=======================================================
+HOCHSCHULE PFORZHEIM — MEM & MIM MASTER PROGRAMS
+Faculty of Engineering (Fakultät für Technik)
+Source: Official Module Handbook SPO 2024, SS2026 Syllabi, University Website
+=======================================================
+
+PROGRAMS:
+1. MEM — Wirtschaftsingenieurwesen: Engineering and Management (M.Sc.)
+   Director: Prof. Dr. Ansgar Kühn | Duration: 3 semesters | SPO 2024
+   Application: WS26/27 by 15 June; winter by 15 January | apply: campus.hs-pforzheim.de
+   Features: Small groups (20-25), electives from all 3 faculties, Double Degree Taiwan Tech, semester abroad option
+   Career: strategic procurement, product management, project management, production, controlling
+
+2. MIM — Industrial Management (M.Sc.) — also English Track for international students
+   Director: Prof. Dr. Ansgar Kühn (Tel: 07231-286490)
+   Content: Technology & Innovation Management, Leadership, Process & Data Management, Networked Systems & AI
+   English Track: fully in English for international students; students learn German culture too
+
+GRADING: 1.0=Sehr gut, 2.0=Gut, 3.0=Befriedigend, 4.0=Ausreichend, 5.0=Fail. UPL=pass/fail.
+ECTS: 1 CP = 25-30 work hours.
+PLH=paper(20-40pp), PLK=exam, PLM=oral, PLP=project(40-60pp), PLR=presentation, PLT=thesis(70-100pp), UPL=ungraded.
+
+PROGRAM LEARNING OUTCOMES:
+1. Responsible Leadership: apply & reflect leadership principles; ethics & sustainability
+2. Creative Problem-Solving: identify, analyse, solve problems; communicate solutions
+3. Research Competence: apply research methods; achieve reliable results
+4. Interdisciplinary & Integrative Work: engineering-business expertise; project management
+
+=======================================================
+MEM MODULE HANDBOOK SPO 2024
+=======================================================
+
+MODULE 1: LEADERSHIP (MWI10001) — Sem 1 | 6 ECTS | SWS 4 | German/English
+Director: Prof. Dr. Kühn | Workload: 180h
+  MWI10002 Führung — Dr. Dieter Lederer — PLH/PLR — Topics: leadership styles, values, communication, body language
+  MWI10003 Führung in Projekten — Sven Bemmé — PLP/PLH/PLR — German — Topics: project mgmt tools, conflict management, moderation
+
+MODULE 2: PRODUKTIONSSTRATEGIE (MWI10004) — Sem 1 | 6 ECTS | German | PLK 90min
+Director: Prof. Dr. Kühn
+  MWI10005 Produktionsstrategie und Methoden — Dr. Delang — Value Stream Mapping, BPM, Value Engineering
+  MWI10006 Lean Management — Prof. Dr. Emmerich — Lean philosophy, production systems, flexibility tools
+
+MODULE 3: FORSCHUNGSMETHODEN & INNOVATION (MWI10007) — Sem 1 | 6 ECTS | German or English
+Director: Prof. Dr. Hinderer | Prereq: English B2 | Applies to MIM & MEM
+  MWI10008 Forschungsmethoden — Prof. Dr. Ludwig Martin / Prof. Dr. Rebecca Bulander
+  MWI10009 Produktstrategie/Produktentwicklung — Prof. Dr. Rainer Wunderlich / Prof. Dr. Hinderer
+
+MODULE 4: INTERDISZIPLINÄRES INNOVATIONS-/FORSCHUNGSPROJEKT (MWI10010) — Sem 1/2 | 9 ECTS | PLP
+Director: Prof. Dr. Kühn | Groups of 4 | MIM & MEM compulsory
+  MWI10011 Konzeption (3 ECTS) | MWI10012 Realisierung (6 ECTS)
+
+MODULE 5: WERTORIENTIERTE UNTERNEHMENSFÜHRUNG / VALUE BASED MANAGEMENT (MWI10013) — Sem 2 | 6 ECTS | English | PLK 45min
+Director: Prof. Schnell | Prereq: controlling basics, cost/financial accounting
+  MWI10014 Financial Management & Control — Prof. Harald Schnell — PART 2 of module
+  MWI10015 KPI Management — Prof. Dr. Binder / Prof. Dr. Bingwen Yan — PART 1 of module
+Topics: EVA, SVA, ROI, CFROI, budgeting, IFRS/US-GAAP, KPI systems
+
+MODULE 6: MANAGEMENT NEUER TECHNOLOGIEN / EMERGING TECHNOLOGIES (MWI10016) — Sem 2 | 6 ECTS | English | PLK/PLP 60min
+Director: Prof. Dr. Kölmel | Prereq: English B2
+  MWI10017 Technische Konzepte — Prof. Dr. Thomas Schuster
+  MWI10018 Organisatorische Konzepte — Prof. Dr. Kölmel
+Topics: IoT, Cloud Computing, technology management, digital business models, prototyping
+
+MODULE 7: CROSS BORDER COOPERATION (MWI10019) — Sem 2 | 6 ECTS | PLP
+Director: Prof. Dr. Kühn | Prereq: English B2
+Format: Company project + international excursion
+Topics: internationalisation strategies, international HRM, global SCM, intercultural management
+
+MODULE 8: MANAGING THE VALUE CHAIN (MWI10020) — Sem 1/2 | 6 ECTS | MEM & MIM compulsory
+Directors: Prof. Dr. Bulander, Prof. Dr. Peter
+  MWI10021 Geschäftsprozessmanagement — Prof. Dr. Bulander — German — BPMN, BPM, process mining
+  MWI10022 Strategischer Einkauf / Strategic Procurement — Prof. Dr. Peter — English — sourcing, supplier mgmt, make-or-buy
+
+MODULE 9: ELECTIVES / WAHLPFLICHTFÄCHER (MWI10023) — Sem 1/2 | 9 ECTS
+3 electives from all 3 HS Pforzheim faculties (Technik, Wirtschaft & Recht, Gestaltung)
+
+MODULE 10: CAPSTONE (MWI10027) — Sem 3 | 6 ECTS | Prereq: ALL courses completed
+Director: Prof. Dr. Kühn
+  MWI10028 Capstone Seminar — Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter — PLH/PLR/PLP
+    Assessment: Team participation 60% + Presentations 40%. Full attendance required.
+  COL6996 Fachwissenschaftliches Kolloquium — UPL
+
+MODULE 11: MASTER-THESIS (THE6880) — Sem 3 | 24 ECTS | 6 months | PLT
+
+=======================================================
+SS2026 SYLLABI
+=======================================================
+
+MWI10008 RESEARCH METHODS
+Prof. Dr. Ludwig Martin | ludwig.martin@hs-pforzheim.de | Tel: +49 7231 28 6186 | Office T1.3.25
+3 ECTS | 90h | English | Prereq: English C1, Statistics 1
+Assessment: Groups of ~2; 20-30 min presentation + paper/chapter/conference paper
+Topics: Research paradigms, scientific ethics, plagiarism, AI in academic work, literature, state of art
+
+MWI10009 PRODUKTSTRATEGIE / PRODUKTENTWICKLUNG
+Prof. Dr. Rainer Wunderlich | rainer.wunderlich@hs-pforzheim.de | Tel: 07231 28-6677 | Office T1.5.26
+3 ECTS | 90h | German | Start: 18.03.2026 | Wed 08:00–09:45 + Mondays
+Assessment: Presentation 20% + Written 70% + Discussion 10%
+Topics: Design Thinking, BMC, Lean Canvas, product idea → business model
+Literature: Porter, Lewrick (Design Thinking Playbook), Osterwalder & Pigneur (BMG), Ulrich & Eppinger
+
+MWI10014 FINANCIAL MANAGEMENT AND CONTROL
+Prof. Harald Schnell | harald.schnell@hs-pforzheim.de | Tel: 07231 28-6684 | Office T1.3.28
+3 ECTS | 90h | English | Start: Wed 18.03.2026 / 9:45
+Structure: (1) Business Simulation 1 day — CEO of Robert Wash Ltd; (2) ~9 workshops — present topic + 4-page seminar paper
+Topics: target costing, life cycle costing, budgeting, make vs buy, contribution margin, company valuation
+
+MWI10015 MANAGEMENT BY KEY PERFORMANCE INDICATORS
+Prof. Dr. Bingwen Yan | b.yan@lb.hs-pforzheim.de | Start: Thursday 09 April 2026
+3 ECTS | 90h | English | Prereq: Bachelor financial accounting + value-based management
+Topics: KPI frameworks, balance sheet, P&L, cash flow, EVA/ROI/ROCE/ROE, digital controlling, crisis management (2008/09, Euro crisis)
+Note: Part 1 of Value Based Management module (Part 2 = MWI10014)
+
+MWI10016 MANAGING OF EMERGING TECHNOLOGIES
+Dr. Michael Krutwig | michael@krutwig.com | via MS Teams
+6 ECTS | 180h | English | 24 sessions: Emerging Tech Radar, Technology Strategy (1-6), Cloud (7-8), Data Analytics (9), IoT (10), Blockchain (11-12), AI (13-14), Additive Mfg (15), Group work (16-22), Presentations (23-24)
+
+MWI10022 STRATEGIC PROCUREMENT
+Prof. Dr. Moritz Peter | Moritz.peter@hs-pforzheim.de | Tel: (07231) 28-6671 | Office T2.3.12 | Wed 15:30–17:00
+3 ECTS | 90h | English | No prereqs
+Topics: Sourcing process, supplier selection & portfolio, procurement strategy, CSR, digitalization; Case studies by Porsche AG
+Assessment: PLP/PLR with individual contribution
+Structure: Lecture → Group case study → Presentations & feedback
+
+MWI10028 CAPSTONE SEMINAR
+Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter | raphael.volz@hs-pforzheim.de | Office T2.5.13
+4 ECTS | 120h | English & German (project-dependent) | Prereq: ALL Master courses
+Assessment: Team participation 60% + Presentations 40%. Full attendance required.
+Summary: Complex company-related final project. Topic defined with industry partner.
+
+MWI10061 GRUNDLAGEN DER INDUSTRIELLEN PRODUKTION
+Prof. Dr. H. Emmerich | herbert.emmerich@hs-pforzheim.de | Tel: 07231/28-6664 | Office T1.3.23
+3 ECTS | 90h | German | Wed 15:30–17:00 weekly | Prereq: solid production engineering knowledge
+Topics: Arbeitsplanung, design for manufacturing, work organisation, Lean strategies, productivity tools
+Assessment: Written Klausur
+
+MWI10069 NEGOTIATIONS B2B
+Prof. Dr. Moritz Peter | Moritz.peter@hs-pforzheim.de | Tel: (07231) 286671
+3 ECTS | 90h | English | No prereqs
+3 phases: Pre-bargaining (Negotiation Playbook) → Bargaining (Meeting Minutes) → Closing & follow-up (contracts)
+Schedule: (1) Intro & teams; (2-4) Workshops; (5) Final presentations
+Literature: Fisher/Ury/Patton (Getting to Yes), Lewicki (Essentials of Negotiation)
+Note: Complements MWI10022 — both by Prof. Peter form a procurement/negotiation track.
+
+BAE5028 FUTURE MOBILITY (ELECTIVE)
+Prof. Dr. Guy Fournier | guy.fournier@hs-pforzheim.de | Tel: 07231 28-6546 | Office T1.3.29 | Mon 13:45–15:15
+3 ECTS | 90h | German | Block: 08.06, 15.06, 18.06, 19.06.2026 | No prereqs
+Topics: EV operating modes, new value chain, automated vehicles (SAE levels, Sense/Plan/Act, LiDAR/V2X), MaaS, V2G, AVENUE & ULTIMO projects
+Assessment: Exam 60min or homework. Max 2 unexcused absences.
+
+BAE5153 UNTERNEHMENSRESTRUKTURIERUNG (ELECTIVE)
+Volker Wintergerst | Volker.Wintergerst@wintergerst.com | Tel: +49 171 7666633
+3 ECTS | 90h | German | Prereq: Bachelor in WI or Wirtschaftswissenschaften
+Topics: Restructuring process, pre-insolvency, insolvency Sanierung, Distressed M&A, automotive crises
+Assessment: Presentation 30% + Written 50% + Discussion 20%
+
+KEY CONTACTS:
+  Program Director MEM/MIM: Prof. Dr. Ansgar Kühn — Tel. 07231-286490
+  Prof. Dr. Raphael Volz (Capstone) — raphael.volz@hs-pforzheim.de — Office T2.5.13
+  Prof. Dr. Moritz Peter (Procurement, Negotiations, Capstone) — Moritz.peter@hs-pforzheim.de — (07231) 28-6671
+  Prof. Dr. Ludwig Martin (Research Methods) — ludwig.martin@hs-pforzheim.de — +49 7231 28 6186
+  Prof. Harald Schnell (Financial Mgmt) — harald.schnell@hs-pforzheim.de — 07231 28-6684
+  Prof. Dr. Bingwen Yan (KPI) — b.yan@lb.hs-pforzheim.de
+  Prof. Dr. Rainer Wunderlich (Produktstrategie) — rainer.wunderlich@hs-pforzheim.de — 07231 28-6677
+  Prof. Dr. Guy Fournier (Future Mobility) — guy.fournier@hs-pforzheim.de — 07231 28-6546
+  Prof. Dr. H. Emmerich (Production) — herbert.emmerich@hs-pforzheim.de — 07231/28-6664
+  Dr. Michael Krutwig (Emerging Tech) — michael@krutwig.com
+  Volker Wintergerst (Restrukturierung) — Volker.Wintergerst@wintergerst.com — +49 171 7666633
+`;
+
+// ── STATE ──
+let lang = 'EN', history = [], busy = false;
+
+function t(k){ return (T[lang] && T[lang][k] !== undefined) ? T[lang][k] : (T.EN[k] || k); }
+
+// ── FULL LANGUAGE RENDER ──
+function setLang(){
+  lang = document.getElementById('langSel').value;
+  const rtl = lang === 'AR';
+  document.documentElement.lang = lang.toLowerCase();
+  document.body.dir = rtl ? 'rtl' : 'ltr';
+
+  // Input placeholder
+  document.getElementById('msgIn').placeholder = t('ph');
+  // Footer
+  document.getElementById('w-footer').textContent = t('footer');
+  // Settings overlay
+  document.getElementById('s-title').textContent = t('settingsTitle');
+  document.getElementById('s-key-label').textContent = t('keyLabel');
+  document.getElementById('s-key-hint').innerHTML = t('keyHint');
+  document.getElementById('s-voice-label').textContent = t('voiceLabel');
+  document.getElementById('voiceArea').placeholder = t('voicePh');
+  document.getElementById('s-save-btn').textContent = t('saveBtn');
+  document.getElementById('s-cancel-btn').textContent = t('cancelBtn');
+
+  // Re-render welcome if still visible
+  const w = document.getElementById('welcome');
+  if(w){
+    document.getElementById('w-title').textContent = t('wTitle');
+    document.getElementById('w-desc').textContent = t('wDesc');
+    renderPills();
+    renderSuggestions();
+  }
+}
+
+function renderPills(){
+  const c = document.getElementById('w-pills');
+  if(!c) return;
+  c.innerHTML = '';
+  (t('pills') || []).forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'pill';
+    d.textContent = p;
+    c.appendChild(d);
+  });
+}
+
+function renderSuggestions(){
+  const c = document.getElementById('w-suggestions');
+  if(!c) return;
+  c.innerHTML = '';
+  (t('suggestions') || []).forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'sq';
+    d.onclick = () => ask(s.text);
+    d.innerHTML = `<span class="sq-tag">${s.tag}</span>${s.text}`;
+    c.appendChild(d);
+  });
+}
+
+// ── SETTINGS ──
+function openSettings(){
+  document.getElementById('apiKeyInput').value = apiKey !== DEFAULT_KEY ? apiKey : '';
+  document.getElementById('statusMsg').className = 'status-msg';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeSettings(){ document.getElementById('overlay').classList.remove('open'); }
+function overlayClick(e){ if(e.target === document.getElementById('overlay')) closeSettings(); }
+
+async function saveSettings(){
+  const newKey = document.getElementById('apiKeyInput').value.trim();
+  const newVoice = document.getElementById('voiceArea').value.trim();
+  const msg = document.getElementById('statusMsg');
+
+  if(!newKey){ msg.textContent = t('noKey'); msg.className = 'status-msg err'; return; }
+
+  msg.textContent = '…'; msg.className = 'status-msg ok';
+
+  // Test the key with a tiny call
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':newKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({ model: MODEL, max_tokens: 10, messages:[{role:'user',content:'Hi'}] })
+    });
+    const d = await r.json();
+    if(d.error){
+      msg.textContent = t('testFail') + d.error.message;
+      msg.className = 'status-msg err';
+    } else {
+      apiKey = newKey;
+      voiceExtra = newVoice;
+      localStorage.setItem('hspf_api_key', apiKey);
+      localStorage.setItem('hspf_voice', voiceExtra);
+      msg.textContent = t('testOk');
+      msg.className = 'status-msg ok';
+      setTimeout(closeSettings, 1500);
+    }
+  } catch(e){
+    msg.textContent = t('testFail') + e.message;
+    msg.className = 'status-msg err';
+  }
+}
+
+// ── SYSTEM PROMPT ──
+function buildSys(){
+  return `You are an expert course assistant for the MEM (Engineering and Management) and MIM (Industrial Management) Master programs at Hochschule Pforzheim, Germany.
+
+You speak in the voice and style of Prof. Dr. Raphael Volz — Capstone Seminar lecturer at HS Pforzheim.
+
+${VOLZ_VOICE}
+${voiceExtra ? '\nADDITIONAL VOICE NOTES:\n' + voiceExtra : ''}
+
+RULES:
+- Answer accurately from the knowledge base below
+- Use Prof. Volz's style: direct, structured, concrete, with rhetorical questions where fitting
+- Always provide professor names and emails for contact questions
+- If info is not in the knowledge base, say so and suggest contacting the relevant professor
+
+${t('li')}
+
+==== KNOWLEDGE BASE ====
+${KB}
+==== END ====`;
+}
+
+// ── SEND ──
+async function send(){
+  if(busy) return;
+  const inp = document.getElementById('msgIn');
+  const txt = inp.value.trim(); if(!txt) return;
+  inp.value = ''; rsz(inp); hw();
+  addB('user', txt);
+  history.push({role:'user', content: txt});
+  busy = true; document.getElementById('sendBtn').disabled = true;
+  const tid = addT();
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:MODEL, max_tokens:1200, system:buildSys(), messages:history})
+    });
+    const d = await r.json(); remT(tid);
+    if(d.error){ addB('bot','⚠ '+d.error.message); }
+    else {
+      const rep = (d.content||[]).map(b=>b.text||'').join('');
+      addB('bot', rep);
+      history.push({role:'assistant', content: rep});
+    }
+  } catch(e){ remT(tid); addB('bot','⚠ Network error: '+e.message); }
+  busy = false; document.getElementById('sendBtn').disabled = false;
+}
+
+function ask(q){ document.getElementById('msgIn').value = q; send(); }
+function hw(){ const w=document.getElementById('welcome'); if(w) w.remove(); }
+let tc=0;
+function addT(){
+  const id='t'+(++tc), c=document.getElementById('msgs'), d=document.createElement('div');
+  d.className='msg bot'; d.id=id;
+  d.innerHTML=`<div class="av" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff">${t('bot')}</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return id;
+}
+function remT(id){ const e=document.getElementById(id); if(e) e.remove(); }
+function addB(role, text){
+  const c=document.getElementById('msgs'), d=document.createElement('div');
+  d.className='msg '+(role==='user'?'user':'bot');
+  const lbl=role==='user'?t('you'):t('bot');
+  const av=role==='user'?`<div class="av">${lbl}</div>`:`<div class="av" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff">${lbl}</div>`;
+  d.innerHTML=`${av}<div class="bubble">${fmt(text)}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function fmt(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<strong style="font-size:13px;color:var(--accent)">$1</strong>')
+    .replace(/^## (.+)$/gm,'<strong style="font-size:14px">$1</strong>')
+    .replace(/^- (.+)$/gm,'&nbsp;• $1').replace(/\n/g,'<br>');
+}
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(!busy) send(); }}
+function rsz(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,90)+'px'; }
+
+// ── INIT ──
+setLang();
+</script>
+</body>
+</html>
