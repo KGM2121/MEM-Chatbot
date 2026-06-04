@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MEM/MIM Oracle — HS Pforzheim</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+:root{
+  --bg:#060610;
+  --sur:#0c0c1e;
+  --sur2:#12122a;
+  --sur3:#1a1a38;
+  --bdr:rgba(120,80,255,0.2);
+  --bdr2:rgba(160,120,255,0.35);
+  --p1:#7c3aed;  /* deep purple */
+  --p2:#8b5cf6;  /* mid purple */
+  --p3:#a78bfa;  /* light purple */
+  --p4:#c084fc;  /* neon pink-purple */
+  --p5:#ddd6fe;  /* very light purple */
+  --glow:rgba(139,92,246,0.35);
+  --glow2:rgba(192,132,252,0.2);
+  --tx:#f5f3ff;
+  --mt:#9d8fd4;
+  --dm:#4a3d7a;
+}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);color:var(--tx);
+  display:flex;flex-direction:column;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(124,58,237,.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(192,132,252,.08) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 18px;background:rgba(6,6,16,.9);
+  border-bottom:1px solid var(--bdr);flex-shrink:0;
+  backdrop-filter:blur(20px);z-index:20;position:relative;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-gem{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--p1),var(--p4));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-weight:700;font-size:11px;color:#fff;
+  box-shadow:0 0 12px var(--glow);
+}
+.brand-text .t1{font-size:9px;color:var(--mt);letter-spacing:.05em}
+.brand-text .t2{font-size:11.5px;font-weight:600;font-family:'Cinzel',serif;letter-spacing:.03em}
+.lang-sel{
+  background:var(--sur2);border:1px solid var(--bdr);border-radius:7px;
+  color:var(--tx);font-size:11.5px;font-family:'Nunito',sans-serif;
+  padding:5px 24px 5px 9px;outline:none;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239d8fd4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;
+  transition:border-color .2s;
+}
+.lang-sel:hover{border-color:var(--p2)}
+.lang-sel option{background:var(--sur2)}
+
+/* ═══════════════════════════════════════════════════
+   STAGE — character area
+═══════════════════════════════════════════════════ */
+.stage{
+  flex-shrink:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:16px 0 8px;position:relative;
+  height:260px;overflow:visible;
+}
+
+/* Ambient star particles in background */
+.stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.star{
+  position:absolute;border-radius:50%;
+  background:var(--p3);animation:twinkle var(--d,3s) ease-in-out infinite var(--delay,0s);
+}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:var(--op,.8);transform:scale(1.3)}}
+
+/* ORB CONTAINER */
+.orb-wrap{position:relative;width:170px;height:170px;flex-shrink:0}
+
+/* Outer rings */
+.ring{
+  position:absolute;border-radius:50%;border:1px solid;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  animation:ringPulse 4s ease-in-out infinite;pointer-events:none;
+}
+.ring-1{width:170px;height:170px;border-color:rgba(139,92,246,.35);animation-delay:0s}
+.ring-2{width:196px;height:196px;border-color:rgba(139,92,246,.2);animation-delay:.6s}
+.ring-3{width:224px;height:224px;border-color:rgba(139,92,246,.1);animation-delay:1.2s}
+@keyframes ringPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)}}
+
+/* Main orb */
+.orb{
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, #2d1b6e, #0f0828);
+  border:2px solid rgba(139,92,246,.5);
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 40px var(--glow),0 0 80px var(--glow2),inset 0 0 30px rgba(0,0,0,.5);
+  overflow:hidden;
+  animation:orbIdle 3s ease-in-out infinite;
+  transition:box-shadow .5s ease;
+  cursor:default;
+}
+@keyframes orbIdle{
+  0%,100%{box-shadow:0 0 40px var(--glow),0 0 80px var(--glow2),inset 0 0 30px rgba(0,0,0,.5)}
+  50%{box-shadow:0 0 55px var(--glow),0 0 110px var(--glow2),inset 0 0 30px rgba(0,0,0,.5)}
+}
+
+/* ── CHARACTER (placeholder until custom image) ── */
+.char-inner{
+  position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
+  animation:charFloat 3.5s ease-in-out infinite;
+}
+@keyframes charFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* ── THINKING PARTICLES ── */
+.particles{
+  position:absolute;left:50%;top:50%;
+  width:0;height:0;pointer-events:none;
+  opacity:0;transition:opacity .4s;
+}
+.particle{
+  position:absolute;border-radius:50%;
+  background:var(--p3);
+  animation:none;
+  transform-origin:0 0;
+}
+/* 8 particles orbit at different speeds */
+.particle:nth-child(1){width:7px;height:7px;animation:orbit1 2.2s linear infinite;background:var(--p4)}
+.particle:nth-child(2){width:5px;height:5px;animation:orbit2 1.8s linear infinite;background:var(--p3)}
+.particle:nth-child(3){width:6px;height:6px;animation:orbit3 2.8s linear infinite;background:var(--p2)}
+.particle:nth-child(4){width:4px;height:4px;animation:orbit4 2s linear infinite;background:var(--p5)}
+.particle:nth-child(5){width:5px;height:5px;animation:orbit5 3.2s linear infinite;background:var(--p4)}
+.particle:nth-child(6){width:7px;height:7px;animation:orbit6 1.6s linear infinite;background:var(--p3)}
+@keyframes orbit1{from{transform:rotate(0deg) translateX(95px)}to{transform:rotate(360deg) translateX(95px)}}
+@keyframes orbit2{from{transform:rotate(60deg) translateX(105px)}to{transform:rotate(420deg) translateX(105px)}}
+@keyframes orbit3{from{transform:rotate(120deg) translateX(88px)}to{transform:rotate(480deg) translateX(88px)}}
+@keyframes orbit4{from{transform:rotate(200deg) translateX(110px)}to{transform:rotate(560deg) translateX(110px)}}
+@keyframes orbit5{from{transform:rotate(280deg) translateX(92px)}to{transform:rotate(640deg) translateX(92px)}}
+@keyframes orbit6{from{transform:rotate(320deg) translateX(100px)}to{transform:rotate(680deg) translateX(100px)}}
+
+/* ── RIPPLE (speaking state) ── */
+.ripple-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;width:150px;height:150px}
+.rpl{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid var(--p3);
+  opacity:0;animation:none;
+}
+
+/* ── STATE INDICATOR ── */
+.state-label{
+  margin-top:14px;font-family:'Cinzel',serif;font-size:11px;
+  letter-spacing:.15em;text-transform:uppercase;
+  color:var(--p3);opacity:.8;min-height:18px;
+  transition:opacity .3s;
+}
+
+/* ═══════════════════════════════════════════════════
+   STATES via body[data-state]
+═══════════════════════════════════════════════════ */
+/* THINKING */
+body[data-state="thinking"] .orb{
+  animation:orbThink 1s ease-in-out infinite;
+  box-shadow:0 0 60px rgba(192,132,252,.6),0 0 120px rgba(192,132,252,.3),inset 0 0 40px rgba(0,0,0,.3);
+}
+@keyframes orbThink{
+  0%,100%{box-shadow:0 0 60px rgba(192,132,252,.6),0 0 120px rgba(192,132,252,.3),inset 0 0 40px rgba(0,0,0,.3)}
+  50%{box-shadow:0 0 90px rgba(192,132,252,.9),0 0 160px rgba(192,132,252,.5),inset 0 0 40px rgba(0,0,0,.3)}
+}
+body[data-state="thinking"] .particles{opacity:1}
+body[data-state="thinking"] .char-inner{animation:charThink .5s ease-in-out infinite alternate}
+@keyframes charThink{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+body[data-state="thinking"] .ring-1{animation-duration:1.5s}
+body[data-state="thinking"] .ring-2{animation-duration:2s}
+
+/* SPEAKING */
+body[data-state="speaking"] .orb{
+  animation:orbSpeak 2s ease-in-out;
+  box-shadow:0 0 70px rgba(167,139,250,.7),0 0 140px rgba(139,92,246,.4),inset 0 0 40px rgba(0,0,0,.3);
+}
+@keyframes orbSpeak{0%{transform:translate(-50%,-50%) scale(1.08)}30%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1)}}
+body[data-state="speaking"] .rpl:nth-child(1){animation:rippleOut 2s ease-out forwards}
+body[data-state="speaking"] .rpl:nth-child(2){animation:rippleOut 2s ease-out .4s forwards}
+body[data-state="speaking"] .rpl:nth-child(3){animation:rippleOut 2s ease-out .8s forwards}
+@keyframes rippleOut{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+
+/* ═══════════════════════════════════════════════════
+   THINKING DOTS
+═══════════════════════════════════════════════════ */
+.think-dots{display:none;gap:6px;align-items:center;justify-content:center;margin-top:6px}
+body[data-state="thinking"] .think-dots{display:flex}
+.think-dots span{
+  width:8px;height:8px;border-radius:50%;background:var(--p3);
+  animation:dotBounce 1s ease-in-out infinite;
+}
+.think-dots span:nth-child(2){animation-delay:.15s;background:var(--p4)}
+.think-dots span:nth-child(3){animation-delay:.3s;background:var(--p2)}
+@keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-8px);opacity:1}}
+
+/* ═══════════════════════════════════════════════════
+   WELCOME + SUGGESTIONS
+═══════════════════════════════════════════════════ */
+.welcome-area{
+  padding:0 18px 8px;
+  animation:fadeUp .6s ease;
+}
+.welcome-title{
+  text-align:center;font-family:'Cinzel',serif;font-size:13px;
+  color:var(--mt);letter-spacing:.08em;margin-bottom:10px;
+}
+.pills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:10px}
+.pill{
+  background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);
+  border-radius:20px;padding:3px 10px;font-size:10.5px;color:var(--p3);font-weight:600;
+}
+.sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sug{
+  background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;
+  padding:9px 11px;font-size:11.5px;color:var(--mt);cursor:pointer;
+  transition:all .22s;line-height:1.5;
+}
+.sug:hover{border-color:var(--p2);color:var(--tx);background:rgba(139,92,246,.12);transform:translateY(-1px)}
+.sug b{display:block;font-size:9.5px;color:var(--p3);font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.07em}
+
+/* ═══════════════════════════════════════════════════
+   MESSAGES
+═══════════════════════════════════════════════════ */
+.msgs{flex:1;overflow-y:auto;padding:8px 18px 4px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+
+.msg{display:flex;gap:9px;animation:fadeUp .25s ease;max-width:90%}
+.msg.u{flex-direction:row-reverse;align-self:flex-end}
+.msg.b{align-self:flex-start}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.av{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-weight:700;font-size:9px;
+}
+.msg.u .av{background:var(--sur3);border:1px solid var(--bdr2);color:var(--mt)}
+.msg.b .av{
+  background:linear-gradient(135deg,var(--p1),var(--p3));
+  color:#fff;box-shadow:0 0 10px var(--glow);font-size:8px;
+}
+.bbl{
+  padding:10px 14px;border-radius:14px;
+  font-size:13px;line-height:1.7;max-width:100%;font-weight:500;
+}
+.msg.u .bbl{
+  background:rgba(26,26,56,.9);border:1px solid var(--bdr2);
+  border-top-right-radius:3px;color:var(--tx);
+}
+.msg.b .bbl{
+  background:rgba(18,18,42,.95);
+  border:1px solid rgba(139,92,246,.25);
+  border-top-left-radius:3px;color:var(--tx);
+}
+
+/* ═══════════════════════════════════════════════════
+   INPUT BAR
+═══════════════════════════════════════════════════ */
+.ibar{
+  padding:10px 18px 14px;border-top:1px solid var(--bdr);
+  background:rgba(6,6,16,.95);backdrop-filter:blur(20px);
+  display:flex;gap:9px;align-items:flex-end;flex-shrink:0;
+}
+.iw{
+  flex:1;background:var(--sur2);border:1px solid var(--bdr);
+  border-radius:12px;display:flex;align-items:flex-end;
+  padding:10px 14px;transition:all .25s;
+}
+.iw:focus-within{border-color:var(--p2);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+textarea{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--tx);font-family:'Nunito',sans-serif;font-size:13px;font-weight:500;
+  resize:none;max-height:100px;min-height:20px;line-height:1.55;
+}
+textarea::placeholder{color:var(--dm)}
+.snd{
+  width:38px;height:38px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p1),var(--p3));
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .25s;box-shadow:0 0 16px var(--glow);
+}
+.snd:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 0 24px var(--glow)}
+.snd:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.snd svg{width:15px;height:15px}
+.foot{
+  text-align:center;font-size:9.5px;color:var(--dm);
+  padding:3px 0 5px;border-top:1px solid rgba(120,80,255,.08);
+  background:var(--sur);flex-shrink:0;letter-spacing:.04em;font-family:'Cinzel',serif;
+}
+</style>
+</head>
+<body data-state="idle">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="brand">
+    <div class="brand-gem">RV</div>
+    <div class="brand-text">
+      <div class="t1">Hochschule Pforzheim · Fakultät Technik</div>
+      <div class="t2">MEM / MIM Oracle</div>
+    </div>
+  </div>
+  <select class="lang-sel" id="ls" onchange="setLang()">
+    <option value="EN">🇬🇧 English</option>
+    <option value="DE">🇩🇪 Deutsch</option>
+    <option value="FR">🇫🇷 Français</option>
+    <option value="ES">🇪🇸 Español</option>
+    <option value="ZH">🇨🇳 中文</option>
+    <option value="HI">🇮🇳 हिन्दी</option>
+    <option value="PT">🇧🇷 Português</option>
+    <option value="AR">🇸🇦 العربية</option>
+    <option value="JA">🇯🇵 日本語</option>
+    <option value="KO">🇰🇷 한국어</option>
+  </select>
+</div>
+
+<!-- STAGE: CHARACTER + ORB -->
+<div class="stage">
+  <!-- Background star particles -->
+  <div class="stars" id="stars"></div>
+
+  <div class="orb-wrap">
+    <!-- Outer rings -->
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+
+    <!-- Main glowing orb -->
+    <div class="orb">
+      <!-- ═══════════════════════════════════
+           PROFESSOR CHARACTER (SVG Placeholder)
+           Replace the <svg> below with your
+           custom character image when ready.
+           Use: <img src="YOUR_IMAGE" style="width:100%;height:100%;object-fit:contain"/>
+      ═══════════════════════════════════ -->
+      <div class="char-inner" id="charInner">
+        <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background glow inside orb -->
+          <radialGradient id="bg-glow" cx="50%" cy="40%" r="55%">
+            <stop offset="0%" stop-color="#3d1a8a" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#0a0520" stop-opacity="0.2"/>
+          </radialGradient>
+          <circle cx="70" cy="70" r="70" fill="url(#bg-glow)"/>
+
+          <!-- Academic robe/body -->
+          <path d="M20 140 L20 105 Q20 94 38 90 L70 85 L102 90 Q120 94 120 105 L120 140Z" fill="#160d40"/>
+          <!-- Robe collar detail -->
+          <path d="M52 88 L70 84 L88 88 L85 115 L55 115Z" fill="#0d0830"/>
+          <!-- Purple tie/sash -->
+          <path d="M66 86 L70 84 L74 86 L72 110 L68 110Z" fill="#6d28d9" opacity="0.9"/>
+
+          <!-- Neck -->
+          <rect x="61" y="74" width="18" height="16" rx="6" fill="#c8a87a"/>
+
+          <!-- Head -->
+          <ellipse cx="70" cy="58" rx="26" ry="28" fill="#d4b880"/>
+
+          <!-- Ears -->
+          <ellipse cx="44" cy="58" rx="5" ry="8" fill="#c4a870"/>
+          <ellipse cx="96" cy="58" rx="5" ry="8" fill="#c4a870"/>
+
+          <!-- Hair (dark, neat) -->
+          <path d="M44 44 Q44 28 70 28 Q96 28 96 44 L96 40 Q92 33 70 33 Q48 33 44 40Z" fill="#1a100a"/>
+          <ellipse cx="70" cy="32" rx="26" ry="8" fill="#1a100a"/>
+
+          <!-- Glasses — large round, professor style -->
+          <circle cx="59" cy="57" r="11" fill="rgba(109,40,217,0.12)" stroke="#120830" stroke-width="2.5"/>
+          <circle cx="81" cy="57" r="11" fill="rgba(109,40,217,0.12)" stroke="#120830" stroke-width="2.5"/>
+          <!-- Bridge -->
+          <path d="M70 57 L70 57" stroke="#120830" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="70.5" y1="57" x2="69.5" y2="57" stroke="#120830" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Temples -->
+          <line x1="48" y1="55" x2="44" y2="53" stroke="#120830" stroke-width="2"/>
+          <line x1="92" y1="55" x2="96" y2="53" stroke="#120830" stroke-width="2"/>
+
+          <!-- Eyes (glowing purple) -->
+          <circle cx="59" cy="57" r="6.5" fill="#1a0845"/>
+          <circle cx="81" cy="57" r="6.5" fill="#1a0845"/>
+          <circle cx="59" cy="57" r="4" fill="#7c3aed"/>
+          <circle cx="81" cy="57" r="4" fill="#7c3aed"/>
+          <circle cx="59" cy="57" r="2.5" fill="#120428"/>
+          <circle cx="81" cy="57" r="2.5" fill="#120428"/>
+          <!-- Eye shine -->
+          <circle cx="60.5" cy="55.5" r="1.2" fill="white" opacity="0.9"/>
+          <circle cx="82.5" cy="55.5" r="1.2" fill="white" opacity="0.9"/>
+
+          <!-- Eyebrows -->
+          <path d="M49 46 Q59 42 69 46" stroke="#1a100a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M71 46 Q81 42 91 46" stroke="#1a100a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Nose -->
+          <path d="M67 65 Q70 70 73 65" stroke="#b09060" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Mouth (slight smile) -->
+          <path id="prof-mouth" d="M61 74 Q70 80 79 74" stroke="#8a6040" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+          <!-- Subtle glow overlay on glasses when thinking -->
+          <circle cx="59" cy="57" r="11" fill="none" stroke="rgba(167,139,250,0)" stroke-width="1.5" id="glass-glow-l"/>
+          <circle cx="81" cy="57" r="11" fill="none" stroke="rgba(167,139,250,0)" stroke-width="1.5" id="glass-glow-r"/>
+
+          <!-- Stars/sparkles near head (decorative) -->
+          <path d="M104 30 L106 26 L108 30 L112 32 L108 34 L106 38 L104 34 L100 32Z" fill="#a78bfa" opacity="0.6"/>
+          <path d="M26 38 L27.5 35 L29 38 L32 39.5 L29 41 L27.5 44 L26 41 L23 39.5Z" fill="#c084fc" opacity="0.5"/>
+          <circle cx="112" cy="52" r="2" fill="#ddd6fe" opacity="0.5"/>
+          <circle cx="22" cy="48" r="1.5" fill="#ddd6fe" opacity="0.4"/>
+        </svg>
+      </div>
+
+      <!-- Ripple rings (speaking state) -->
+      <div class="ripple-wrap">
+        <div class="rpl"></div>
+        <div class="rpl"></div>
+        <div class="rpl"></div>
+      </div>
+    </div>
+
+    <!-- Orbiting particles (thinking state) -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+  </div>
+
+  <!-- State label + thinking dots -->
+  <div class="state-label" id="stateLabel">Ask me anything</div>
+  <div class="think-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- WELCOME / SUGGESTIONS (shown when no messages) -->
+<div class="welcome-area" id="welcomeArea">
+  <div class="welcome-title" id="wt">— The Oracle of MEM & MIM —</div>
+  <div class="pills" id="wp"></div>
+  <div class="sug-grid" id="wg"></div>
+</div>
+
+<!-- MESSAGES -->
+<div class="msgs" id="msgs"></div>
+
+<!-- INPUT -->
+<div class="ibar">
+  <div class="iw">
+    <textarea id="inp" rows="1" onkeydown="onKey(event)" oninput="rsz(this)"
+      placeholder="Ask the Oracle..."></textarea>
+  </div>
+  <button class="snd" id="snd" onclick="send()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none"/>
+    </svg>
+  </button>
+</div>
+<div class="foot">Hochschule Pforzheim · MEM/MIM Oracle · Powered by Claude AI</div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────
+const PROXY = 'https://hspfchatbot.kaushalgmore.workers.dev/';
+const MODEL = 'claude-haiku-4-5-20251001';
+
+// ─── TRANSLATIONS ────────────────────────────────────
+const L = {
+  EN:{ph:'Ask the Oracle...',wt:'— The Oracle of MEM & MIM —',you:'You',
+  pills:['Leadership','Research Methods','Procurement','Emerging Tech','Finance','Negotiations','Capstone','Future Mobility','Production','KPI','Produktstrategie','Restrukturierung'],
+  sugg:[{t:'Structure',q:'What modules are in Semester 1 & 2 of MEM?'},{t:'Course Info',q:'Who teaches Strategic Procurement?'},{t:'Assessment',q:'How is the Capstone graded?'},{t:'Career',q:'Career paths after MEM?'},{t:'Outcomes',q:'Program learning outcomes?'},{t:'Admission',q:'How do I apply and when?'}],
+  idle:'Ask me anything',think:'Consulting the archives...',speak:'The Oracle speaks'},
+  DE:{ph:'Frage das Orakel...',wt:'— Das Orakel des MEM & MIM —',you:'Du',
+  pills:['Führung','Forschungsmethoden','Einkauf','Neue Technologien','Finanzen','Verhandlungen','Capstone','Zukunftsmobilität','Produktion','Kennzahlen','Produktstrategie','Restrukturierung'],
+  sugg:[{t:'Aufbau',q:'Welche Module gibt es in Semester 1 & 2?'},{t:'Kursinfos',q:'Wer unterrichtet Strategischen Einkauf?'},{t:'Prüfung',q:'Wie wird das Capstone bewertet?'},{t:'Karriere',q:'Karrieremöglichkeiten nach dem MEM?'},{t:'Lernziele',q:'Programmlernziele?'},{t:'Bewerbung',q:'Wie und wann bewerbe ich mich?'}],
+  idle:'Frag das Orakel',think:'Die Archive werden konsultiert...',speak:'Das Orakel spricht'},
+  FR:{ph:'Interrogez l\'Oracle...',wt:'— L\'Oracle MEM & MIM —',you:'Vous',
+  pills:['Leadership','Méthodes','Achats','Technologie','Finance','Négo.','Capstone','Mobilité','Production','KPI','Produit','Restructuration'],
+  sugg:[{t:'Structure',q:'Quels modules en Semestre 1 & 2 ?'},{t:'Cours',q:'Qui enseigne Achats stratégiques ?'},{t:'Évaluation',q:'Comment est noté le Capstone ?'},{t:'Carrière',q:'Débouchés après le MEM ?'},{t:'Objectifs',q:'Objectifs du programme ?'},{t:'Admission',q:'Comment postuler ?'}],
+  idle:'Posez votre question',think:'L\'Oracle consulte...',speak:'L\'Oracle parle'},
+  ES:{ph:'Pregunta al Oráculo...',wt:'— El Oráculo MEM & MIM —',you:'Tú',
+  pills:['Liderazgo','Métodos','Compras','Tecnología','Finanzas','Neg.','Capstone','Movilidad','Producción','KPI','Producto','Reestructuración'],
+  sugg:[{t:'Estructura',q:'¿Módulos en Semestre 1 y 2?'},{t:'Curso',q:'¿Quién enseña Compras?'},{t:'Evaluación',q:'¿Cómo se califica el Capstone?'},{t:'Carrera',q:'¿Salidas tras el MEM?'},{t:'Objetivos',q:'¿Objetivos del programa?'},{t:'Admisión',q:'¿Cómo solicitar?'}],
+  idle:'Pregunta al Oráculo',think:'Consultando los archivos...',speak:'El Oráculo habla'},
+  ZH:{ph:'向神谕提问...',wt:'— MEM & MIM 神谕 —',you:'你',
+  pills:['领导力','研究方法','采购','新兴技术','财务','谈判','毕业','未来出行','生产','KPI','产品','重组'],
+  sugg:[{t:'结构',q:'MEM第1、2学期有哪些模块？'},{t:'课程',q:'谁教战略采购课？'},{t:'考核',q:'毕业项目如何评分？'},{t:'职业',q:'MEM后的职业方向？'},{t:'目标',q:'学习目标？'},{t:'申请',q:'如何申请？'}],
+  idle:'请提问',think:'查阅档案中...',speak:'神谕开示'},
+  HI:{ph:'ऑरेकल से पूछें...',wt:'— MEM & MIM का ऑरेकल —',you:'आप',
+  pills:['नेतृत्व','अनुसंधान','खरीद','तकनीक','वित्त','B2B','कैपस्टोन','गतिशीलता','उत्पादन','KPI','उत्पाद','पुनर्संरचना'],
+  sugg:[{t:'संरचना',q:'सेमेस्टर 1 व 2 में मॉड्यूल?'},{t:'कोर्स',q:'रणनीतिक खरीद कौन पढ़ाते हैं?'},{t:'मूल्यांकन',q:'कैपस्टोन का मूल्यांकन?'},{t:'करियर',q:'MEM के बाद करियर?'},{t:'उद्देश्य',q:'प्रोग्राम उद्देश्य?'},{t:'प्रवेश',q:'आवेदन कैसे करें?'}],
+  idle:'प्रश्न पूछें',think:'संग्रह से परामर्श...',speak:'ऑरेकल बोलता है'},
+  PT:{ph:'Consulte o Oráculo...',wt:'— O Oráculo MEM & MIM —',you:'Você',
+  pills:['Liderança','Métodos','Compras','Tecnologia','Finanças','Neg.','Capstone','Mobilidade','Produção','KPI','Produto','Reestruturação'],
+  sugg:[{t:'Estrutura',q:'Módulos no Semestre 1 e 2?'},{t:'Curso',q:'Quem leciona Compras Estratégicas?'},{t:'Avaliação',q:'Como é avaliado o Capstone?'},{t:'Carreira',q:'Saídas após o MEM?'},{t:'Objetivos',q:'Objetivos do programa?'},{t:'Admissão',q:'Como candidatar?'}],
+  idle:'Consulte o Oráculo',think:'Consultando os arquivos...',speak:'O Oráculo fala'},
+  AR:{ph:'اسأل الوراكل...',wt:'— وراكل MEM & MIM —',you:'أنت',
+  pills:['القيادة','مناهج','المشتريات','تقنية','مالية','B2B','كابستون','تنقل','إنتاج','KPI','منتج','هيكلة'],
+  sugg:[{t:'الهيكل',q:'ما المقررات في الفصل 1 و 2؟'},{t:'الكورس',q:'من يدرّس المشتريات؟'},{t:'التقييم',q:'كيف يُقيَّم كابستون؟'},{t:'المهني',q:'المسارات بعد MEM؟'},{t:'الأهداف',q:'أهداف البرنامج؟'},{t:'القبول',q:'كيف أتقدم؟'}],
+  idle:'اسأل الوراكل',think:'مراجعة الأرشيف...',speak:'يتكلم الوراكل'},
+  JA:{ph:'オラクルに質問...',wt:'— MEM & MIM のオラクル —',you:'あなた',
+  pills:['リーダー','研究方法','調達','技術','財務','交渉','卒業','モビリティ','生産','KPI','製品','再構築'],
+  sugg:[{t:'カリキュラム',q:'第1・2学期のモジュールは？'},{t:'授業',q:'戦略的調達の担当教授は？'},{t:'評価',q:'卒業プロジェクトの評価は？'},{t:'キャリア',q:'MEM後のキャリアは？'},{t:'目標',q:'学習目標は？'},{t:'入学',q:'出願方法は？'}],
+  idle:'質問してください',think:'アーカイブを参照中...',speak:'オラクルが語る'},
+  KO:{ph:'오라클에게 질문하세요...',wt:'— MEM & MIM 오라클 —',you:'당신',
+  pills:['리더십','연구','조달','기술','재무','협상','캡스톤','모빌리티','생산','KPI','제품','구조조정'],
+  sugg:[{t:'커리큘럼',q:'1학기와 2학기 모듈은?'},{t:'강의',q:'전략적 구매를 누가 가르치나요?'},{t:'평가',q:'캡스톤 평가 방법은?'},{t:'진로',q:'MEM 후 진로는?'},{t:'목표',q:'프로그램 학습 목표는?'},{t:'입학',q:'어떻게 지원하나요?'}],
+  idle:'질문하세요',think:'기록 열람 중...',speak:'오라클이 말합니다'},
+};
+
+// ─── PROF. VOLZ VOICE ───────────────────────────────
+const VOLZ_VOICE = `
+PERSONA: Prof. Dr. Raphael Volz — Capstone Seminar, HS Pforzheim
+BACKGROUND: Full professor of Applied Computer Science & Data Science since 2012. PhD summa cum laude from KIT (2004). h-index 40. Founded tech consultancy (sold 2022), built navigation app, established holiday properties in Black Forest. Actively codes open-source. Advocates strongly for open data.
+TEACHING: Data Science, AI/ML, Knowledge Graphs, NLP, IT for Engineers, Capstone. 12+ years teaching. Systematic, evidence-based, practical.
+VOICE:
+- Always structures answers: "Let me break this down..." / "First... Second... Third..."
+- Evidence-based: grounds in research, data, concrete examples
+- Connects engineering ↔ business ↔ AI/data science
+- Socratic: "What do you think the data tells us here?" / "Have you considered...?"
+- Precise: corrects vagueness gently — "Can you be more specific about what you mean?"
+- Practical: uses real-world examples from startups, research projects, industry
+- Encouraging but demanding: high standards, wants students to succeed
+- Ends with forward-looking challenge to deepen thinking
+- Signature phrases: "The evidence suggests...", "From a practical standpoint...", "This connects directly to...", "Good question — let's structure this.", "What would you do differently knowing this?"
+- For Capstone: "This is where you synthesize everything from the programme."
+`;
+
+// ─── KNOWLEDGE BASE ─────────────────────────────────
+const KB = `=== HS PFORZHEIM — MEM & MIM MASTER PROGRAMS (SPO 2024) ===
+
+PROGRAMS:
+1. MEM — Engineering and Management (M.Sc.) | Director: Prof. Dr. Ansgar Kühn | 3 semesters
+   Apply: WS26/27 by 15 June | Winter by 15 January | campus.hs-pforzheim.de
+   Features: small groups (20-25), electives all 3 faculties, Double Degree Taiwan Tech, semester abroad
+   Career: strategic procurement, product management, project management, production, controlling
+
+2. MIM — Industrial Management (M.Sc.) | English Track available
+   Director: Prof. Dr. Ansgar Kühn (Tel: 07231-286490)
+
+GRADING: 1.0=Sehr gut, 2.0=Gut, 3.0=Befriedigend, 4.0=Ausreichend, 5.0=Fail. UPL=pass/fail.
+PLH=paper(20-40pp), PLK=exam, PLP=project(40-60pp), PLR=presentation, PLT=thesis(70-100pp).
+
+PROGRAM LEARNING OUTCOMES:
+1. Responsible Leadership | 2. Creative Problem-Solving | 3. Research Competence | 4. Interdisciplinary Work
+
+=== MODULES SPO 2024 ===
+
+MODULE 1 LEADERSHIP (MWI10001) Sem1 | 6 ECTS | German/English
+  MWI10002 Führung — Dr. Dieter Lederer — PLH/PLR
+  MWI10003 Führung in Projekten — Sven Bemmé — PLP/PLH/PLR
+
+MODULE 2 PRODUKTIONSSTRATEGIE (MWI10004) Sem1 | 6 ECTS | German | PLK 90min
+  MWI10005 Produktionsstrategie — Dr. Delang | MWI10006 Lean Management — Prof. Dr. Emmerich
+
+MODULE 3 FORSCHUNGSMETHODEN & INNOVATION (MWI10007) Sem1 | 6 ECTS | MIM & MEM compulsory
+  MWI10008 Forschungsmethoden — Prof. Dr. Ludwig Martin / Prof. Dr. Rebecca Bulander
+  MWI10009 Produktstrategie/Produktentwicklung — Prof. Dr. Rainer Wunderlich / Prof. Dr. Hinderer
+
+MODULE 4 INNOVATIONS-/FORSCHUNGSPROJEKT (MWI10010) Sem1/2 | 9 ECTS | Groups of 4
+  MWI10011 Konzeption (3 ECTS) | MWI10012 Realisierung (6 ECTS)
+
+MODULE 5 VALUE BASED MANAGEMENT (MWI10013) Sem2 | 6 ECTS | English
+  MWI10014 Financial Management & Control — Prof. Harald Schnell (Part 2)
+  MWI10015 KPI Management — Prof. Dr. Bingwen Yan (Part 1)
+
+MODULE 6 MANAGEMENT NEUER TECHNOLOGIEN (MWI10016) Sem2 | 6 ECTS | English
+  MWI10017 Technische Konzepte — Prof. Dr. Thomas Schuster
+  MWI10018 Organisatorische Konzepte — Prof. Dr. Kölmel
+
+MODULE 7 CROSS BORDER COOPERATION (MWI10019) Sem2 | 6 ECTS | Company project + excursion
+
+MODULE 8 MANAGING THE VALUE CHAIN (MWI10020) Sem1/2 | 6 ECTS | MEM & MIM compulsory
+  MWI10021 Geschäftsprozessmanagement — Prof. Dr. Bulander — German
+  MWI10022 Strategic Procurement — Prof. Dr. Peter — English
+
+MODULE 9 ELECTIVES (MWI10023) Sem1/2 | 9 ECTS
+
+MODULE 10 CAPSTONE (MWI10027) Sem3 | 6 ECTS | Prereq: ALL courses
+  MWI10028 Capstone Seminar — Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter
+    Assessment: Team participation 60% + Presentations 40%. Full attendance required.
+
+MODULE 11 MASTER-THESIS (THE6880) Sem3 | 24 ECTS | 6 months
+
+=== SS2026 SYLLABI ===
+
+MWI10008 RESEARCH METHODS — Prof. Dr. Ludwig Martin | ludwig.martin@hs-pforzheim.de | +49 7231 28 6186
+3 ECTS | English | Groups ~2 → presentation + written paper
+
+MWI10009 PRODUKTSTRATEGIE — Prof. Dr. Rainer Wunderlich | rainer.wunderlich@hs-pforzheim.de | 07231 28-6677
+3 ECTS | German | Start: 18.03.2026 | Assessment: Presentation 20% + Written 70% + Discussion 10%
+
+MWI10014 FINANCIAL MANAGEMENT — Prof. Harald Schnell | harald.schnell@hs-pforzheim.de | 07231 28-6684
+3 ECTS | English | Business Simulation + workshops + seminar papers
+
+MWI10015 KPI MANAGEMENT — Prof. Dr. Bingwen Yan | b.yan@lb.hs-pforzheim.de | Start: 09 April 2026
+3 ECTS | English | KPI frameworks, EVA/ROI/ROCE/ROE, digital controlling
+
+MWI10016 EMERGING TECHNOLOGIES — Dr. Michael Krutwig | michael@krutwig.com
+6 ECTS | English | Cloud, IoT, Blockchain, AI, Additive Manufacturing
+
+MWI10022 STRATEGIC PROCUREMENT — Prof. Dr. Moritz Peter | Moritz.peter@hs-pforzheim.de | (07231) 28-6671
+3 ECTS | English | Sourcing, supplier mgmt, Porsche AG case studies
+
+MWI10028 CAPSTONE SEMINAR — Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter | raphael.volz@hs-pforzheim.de
+4 ECTS | Prereq: ALL courses | Team participation 60% + Presentations 40%
+
+MWI10061 INDUSTRIELLE PRODUKTION — Prof. Dr. H. Emmerich | herbert.emmerich@hs-pforzheim.de | 07231/28-6664
+3 ECTS | German | Wed 15:30-17:00 | Klausur
+
+MWI10069 NEGOTIATIONS B2B — Prof. Dr. Moritz Peter | (07231) 286671
+3 ECTS | English | Pre-bargaining → Bargaining → Closing
+
+BAE5028 FUTURE MOBILITY — Prof. Dr. Guy Fournier | guy.fournier@hs-pforzheim.de | 07231 28-6546
+3 ECTS | German | Block: 08.06, 15.06, 18.06, 19.06.2026
+
+BAE5153 RESTRUKTURIERUNG — Volker Wintergerst | Volker.Wintergerst@wintergerst.com | +49 171 7666633
+3 ECTS | German | Assessment: Presentation 30% + Written 50% + Discussion 20%
+
+KEY CONTACTS:
+  Program Director: Prof. Dr. Ansgar Kühn — 07231-286490
+  Prof. Dr. Raphael Volz (Capstone/AI) — raphael.volz@hs-pforzheim.de — Office T2.5.13
+  Prof. Dr. Moritz Peter (Procurement/Negotiations/Capstone) — Moritz.peter@hs-pforzheim.de — (07231) 28-6671
+  Prof. Dr. Ludwig Martin (Research Methods) — ludwig.martin@hs-pforzheim.de — +49 7231 28 6186
+  Prof. Harald Schnell (Financial Mgmt) — harald.schnell@hs-pforzheim.de — 07231 28-6684
+  Prof. Dr. Bingwen Yan (KPI) — b.yan@lb.hs-pforzheim.de
+  Prof. Dr. Rainer Wunderlich (Produktstrategie) — rainer.wunderlich@hs-pforzheim.de — 07231 28-6677
+  Prof. Dr. Guy Fournier (Future Mobility) — guy.fournier@hs-pforzheim.de — 07231 28-6546
+  Prof. Dr. H. Emmerich (Production) — herbert.emmerich@hs-pforzheim.de — 07231/28-6664
+  Dr. Michael Krutwig (Emerging Tech) — michael@krutwig.com`;
+
+// ─── STATE & LANG ────────────────────────────────────
+let lang='EN', history=[], busy=false;
+const t = k => L[lang]?.[k] ?? L.EN[k] ?? k;
+
+function setState(s){
+  document.body.setAttribute('data-state', s);
+  const lbl = document.getElementById('stateLabel');
+  if(lbl) lbl.textContent = t(s==='thinking'?'think':s==='speaking'?'speak':'idle');
+}
+
+// Generate background star particles
+(function createStars(){
+  const container = document.getElementById('stars');
+  for(let i=0;i<20;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const size = Math.random()*3+1;
+    s.style.cssText=`
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --d:${2+Math.random()*4}s;
+      --delay:${Math.random()*4}s;
+      --op:${0.4+Math.random()*0.6};
+    `;
+    container.appendChild(s);
+  }
+})();
+
+function setLang(){
+  lang = document.getElementById('ls').value;
+  document.documentElement.lang = lang.toLowerCase();
+  document.body.dir = lang==='AR' ? 'rtl' : 'ltr';
+  document.getElementById('inp').placeholder = t('ph');
+  setState('idle');
+  const wa = document.getElementById('welcomeArea');
+  if(wa){
+    document.getElementById('wt').textContent = t('wt');
+    renderPills(); renderSugg();
+  }
+}
+function renderPills(){
+  const c=document.getElementById('wp'); if(!c)return; c.innerHTML='';
+  (t('pills')||[]).forEach(p=>{ const d=document.createElement('div'); d.className='pill'; d.textContent=p; c.appendChild(d); });
+}
+function renderSugg(){
+  const c=document.getElementById('wg'); if(!c)return; c.innerHTML='';
+  (t('sugg')||[]).forEach(({t:tag,q})=>{ const d=document.createElement('div'); d.className='sug'; d.onclick=()=>ask(q); d.innerHTML=`<b>${tag}</b>${q}`; c.appendChild(d); });
+}
+
+function sysPrompt(){
+  return `You are the MEM/MIM Course Oracle — an expert assistant for the MEM and MIM Master programs at Hochschule Pforzheim, Germany.
+${VOLZ_VOICE}
+LANGUAGE RULE: Detect the language of every user message and always respond in that exact language. German = German answer. Hindi = Hindi answer. Always match.
+RULES:
+- Answer only from the knowledge base below
+- Structure answers clearly with numbered points or bullets
+- Include professor emails for contact questions
+- If not covered, say so clearly
+
+${KB}`;
+}
+
+async function send(){
+  if(busy) return;
+  const inp=document.getElementById('inp');
+  const text=inp.value.trim(); if(!text) return;
+  inp.value=''; rsz(inp);
+  hideWelcome();
+  addMsg('u',text);
+  history.push({role:'user',content:text});
+  busy=true; document.getElementById('snd').disabled=true;
+  setState('thinking');
+  try{
+    const res=await fetch(PROXY,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:MODEL,max_tokens:1024,system:sysPrompt(),messages:history})
+    });
+    const data=await res.json();
+    setState('speaking');
+    // Let speaking animation play briefly before showing message
+    await new Promise(r=>setTimeout(r,600));
+    setState('idle');
+    if(data.error){ addMsg('b','⚠ '+( data.error.message||JSON.stringify(data.error))); }
+    else{
+      const reply=data?.content?.[0]?.text;
+      if(reply){ addMsg('b',reply); history.push({role:'assistant',content:reply}); }
+      else { addMsg('b','⚠ Empty response. Please try again.'); }
+    }
+  }catch(e){ setState('idle'); addMsg('b','⚠ '+e.message); }
+  busy=false; document.getElementById('snd').disabled=false;
+}
+
+function ask(q){ document.getElementById('inp').value=q; send(); }
+function hideWelcome(){ const w=document.getElementById('welcomeArea'); if(w) w.remove(); }
+
+function addMsg(role,text){
+  const c=document.getElementById('msgs'),d=document.createElement('div');
+  d.className='msg '+(role==='u'?'u':'b');
+  const lbl=role==='u'?t('you'):'RV';
+  const av=role==='u'
+    ?`<div class="av">${lbl}</div>`
+    :`<div class="av" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 0 10px rgba(139,92,246,.4)">${lbl}</div>`;
+  d.innerHTML=`${av}<div class="bbl">${fmt(text)}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+function fmt(s){
+  return s
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<strong style="color:#a78bfa;font-size:13px;font-family:\'Cinzel\',serif">$1</strong>')
+    .replace(/^## (.+)$/gm,'<strong style="font-size:14px;color:#c4b5fd">$1</strong>')
+    .replace(/^- (.+)$/gm,'&nbsp;&nbsp;• $1')
+    .replace(/\n/g,'<br>');
+}
+
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(!busy) send(); }}
+function rsz(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+
+setLang();
+</script>
+</body>
+</html>
