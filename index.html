@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MEM/MIM Course Assistant — HS Pforzheim</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+:root{
+  /* Black + Purple palette */
+  --bg:#08080e;
+  --sur:#0f0f1a;
+  --sur2:#161625;
+  --sur3:#1e1e30;
+  --bdr:#2a2045;
+  --bdr2:#382e5a;
+  /* Purple accents */
+  --pur:#8b5cf6;
+  --pur2:#a78bfa;
+  --pur3:#7c3aed;
+  --pur-glow:rgba(139,92,246,0.25);
+  --pur-dim:rgba(139,92,246,0.08);
+  --pur-mid:rgba(139,92,246,0.15);
+  --neon:#c084fc;
+  /* Text */
+  --tx:#f0edff;
+  --mt:#8b80b3;
+  --dm:#3d3556;
+  /* Bubbles */
+  --ub:#11102a;
+  --bb:#0d0c20;
+  /* Status */
+  --ok:#34d399;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 20px;border-bottom:1px solid var(--bdr);
+  background:rgba(15,15,26,0.95);backdrop-filter:blur(12px);
+  flex-shrink:0;position:relative;z-index:10;
+}
+.hdr::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--pur),transparent);
+  opacity:0.5;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--pur3),var(--pur2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:#fff;
+  box-shadow:0 0 16px var(--pur-glow);
+}
+.logo-text .school{font-size:9px;color:var(--mt);letter-spacing:.03em}
+.logo-text .prog{font-size:11.5px;font-weight:600;color:var(--tx)}
+.lang-sel{
+  background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;
+  color:var(--tx);font-size:12px;font-family:'Inter',sans-serif;
+  padding:5px 24px 5px 10px;outline:none;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b80b3'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;
+  transition:border-color .2s;
+}
+.lang-sel:focus,.lang-sel:hover{border-color:var(--pur)}
+.lang-sel option{background:var(--sur2)}
+
+/* ── CHAT ── */
+.chat{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.msgs{flex:1;overflow-y:auto;padding:24px 22px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+
+/* ── WELCOME ── */
+.welcome{margin:auto;text-align:center;max-width:500px;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.welcome-icon{
+  width:60px;height:60px;border-radius:18px;
+  background:linear-gradient(135deg,var(--pur3),var(--neon));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#fff;
+  margin:0 auto 16px;
+  box-shadow:0 0 30px var(--pur-glow),0 0 60px rgba(139,92,246,0.1);
+}
+.welcome h2{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  background:linear-gradient(135deg,var(--tx) 40%,var(--pur2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:8px;
+}
+.welcome p{font-size:13px;color:var(--mt);line-height:1.65;margin-bottom:18px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:16px}
+.pill{
+  background:var(--pur-dim);border:1px solid rgba(139,92,246,.2);
+  border-radius:20px;padding:3px 10px;font-size:10.5px;
+  color:var(--pur2);font-weight:500;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;text-align:left}
+.card{
+  background:var(--sur2);border:1px solid var(--bdr);border-radius:11px;
+  padding:10px 12px;font-size:12px;color:var(--mt);cursor:pointer;
+  transition:all .2s;line-height:1.5;
+}
+.card:hover{
+  border-color:var(--pur);color:var(--tx);
+  background:var(--pur-mid);
+  box-shadow:0 0 12px var(--pur-dim);
+}
+.card b{
+  display:block;font-size:9.5px;color:var(--pur2);font-weight:600;
+  margin-bottom:3px;text-transform:uppercase;letter-spacing:.07em;
+}
+
+/* ── MESSAGES ── */
+.msg{display:flex;gap:9px;animation:fadeUp .22s ease;max-width:88%}
+.msg.u{flex-direction:row-reverse;align-self:flex-end}
+.msg.b{align-self:flex-start}
+.av{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:10px;
+}
+.msg.u .av{background:var(--sur3);border:1px solid var(--bdr2);color:var(--mt)}
+.msg.b .av{
+  background:linear-gradient(135deg,var(--pur3),var(--pur2));
+  color:#fff;box-shadow:0 0 10px var(--pur-glow);
+}
+.bbl{padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.7;max-width:100%}
+.msg.u .bbl{
+  background:var(--ub);border:1px solid var(--bdr2);
+  border-top-right-radius:3px;color:var(--tx);
+}
+.msg.b .bbl{
+  background:var(--bb);
+  border:1px solid rgba(139,92,246,.2);
+  border-top-left-radius:3px;color:var(--tx);
+}
+
+/* Typing */
+.dots{display:flex;gap:5px;align-items:center;padding:4px 0}
+.dots span{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--pur);animation:bl 1.2s infinite;
+}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,60%,100%{opacity:.2;transform:scale(1)}30%{opacity:1;transform:scale(1.4)}}
+
+/* ── INPUT BAR ── */
+.ibar{
+  padding:12px 20px 14px;border-top:1px solid var(--bdr);
+  background:rgba(15,15,26,0.95);backdrop-filter:blur(12px);
+  display:flex;gap:9px;align-items:flex-end;flex-shrink:0;
+}
+.iw{
+  flex:1;background:var(--sur2);border:1px solid var(--bdr);
+  border-radius:12px;display:flex;align-items:flex-end;
+  padding:10px 14px;transition:all .2s;
+}
+.iw:focus-within{
+  border-color:var(--pur);
+  box-shadow:0 0 0 3px var(--pur-dim);
+}
+textarea{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;
+  resize:none;max-height:100px;min-height:20px;line-height:1.55;
+}
+textarea::placeholder{color:var(--mt)}
+.snd{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pur3),var(--pur));
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .22s;
+  box-shadow:0 0 14px var(--pur-glow);
+}
+.snd:hover{transform:translateY(-2px);box-shadow:0 0 20px var(--pur-glow)}
+.snd:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.snd svg{width:15px;height:15px}
+
+/* ── FOOTER ── */
+.foot{
+  text-align:center;font-size:10px;color:var(--dm);
+  padding:4px 0 5px;border-top:1px solid var(--bdr);
+  background:var(--sur);flex-shrink:0;letter-spacing:.02em;
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-mark">MEM</div>
+    <div class="logo-text">
+      <div class="school">Hochschule Pforzheim · Fakultät Technik</div>
+      <div class="prog">MEM / MIM Master Programs</div>
+    </div>
+  </div>
+  <select class="lang-sel" id="ls" onchange="setLang()">
+    <option value="EN">🇬🇧 English</option>
+    <option value="DE">🇩🇪 Deutsch</option>
+    <option value="FR">🇫🇷 Français</option>
+    <option value="ES">🇪🇸 Español</option>
+    <option value="ZH">🇨🇳 中文</option>
+    <option value="HI">🇮🇳 हिन्दी</option>
+    <option value="PT">🇧🇷 Português</option>
+    <option value="AR">🇸🇦 العربية</option>
+    <option value="JA">🇯🇵 日本語</option>
+    <option value="KO">🇰🇷 한국어</option>
+  </select>
+</div>
+
+<div class="chat">
+  <div class="msgs" id="msgs">
+    <div class="welcome" id="wlc">
+      <div class="welcome-icon">🎓</div>
+      <h2 id="wt">MEM/MIM Course Assistant</h2>
+      <p id="wd">Your AI-powered guide to the MEM & MIM programs at Hochschule Pforzheim. Ask about modules, professors, grading, career paths, or admission — in any language.</p>
+      <div class="pills" id="wp"></div>
+      <div class="grid" id="wg"></div>
+    </div>
+  </div>
+  <div class="ibar">
+    <div class="iw">
+      <textarea id="inp" rows="1" onkeydown="onKey(event)" oninput="rsz(this)"
+        placeholder="Ask about MEM/MIM courses, modules, professors..."></textarea>
+    </div>
+    <button class="snd" id="snd" onclick="send()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2" fill="white" stroke="none"/>
+      </svg>
+    </button>
+  </div>
+</div>
+<div class="foot">HS Pforzheim · MEM/MIM Course Assistant · Powered by Claude AI</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────
+const PROXY = 'https://hspfchatbot.kaushalgmore.workers.dev/';
+const MODEL = 'claude-haiku-4-5-20251001';
+
+// ─── TRANSLATIONS ─────────────────────────────────
+const L = {
+  EN:{ph:'Ask about courses, modules, professors, career...',wt:'MEM/MIM Course Assistant',wd:'Your AI-powered guide to the MEM & MIM programs at HS Pforzheim. Ask anything — in any language.',you:'You',
+  pills:['Leadership','Research Methods','Strategic Procurement','Emerging Tech','Financial Mgmt','Negotiations B2B','Capstone','Future Mobility','Production','KPI Management','Produktstrategie','Restrukturierung'],
+  cards:[{t:'Structure',q:'What modules are in Semester 1 & 2 of MEM?'},{t:'Course Info',q:'Who teaches Strategic Procurement?'},{t:'Assessment',q:'How is the Capstone graded?'},{t:'Career',q:'Career paths after MEM?'},{t:'Outcomes',q:'What are the program learning outcomes?'},{t:'Admission',q:'How do I apply and what are the deadlines?'}]},
+  DE:{ph:'Fragen zu Modulen, Professoren, Prüfungen, Karriere...',wt:'MEM/MIM Kursassistent',wd:'Dein KI-Assistent für die MEM & MIM Programme an der HS Pforzheim. Stelle Fragen — in jeder Sprache.',you:'Du',
+  pills:['Führung','Forschungsmethoden','Strateg. Einkauf','Neue Technologien','Finanzmanagement','Verhandlungen B2B','Capstone','Zukunftsmobilität','Produktion','Kennzahlen','Produktstrategie','Restrukturierung'],
+  cards:[{t:'Studienaufbau',q:'Welche Module gibt es in Semester 1 & 2?'},{t:'Kursinfos',q:'Wer unterrichtet Strategischen Einkauf?'},{t:'Prüfung',q:'Wie wird das Capstone bewertet?'},{t:'Karriere',q:'Karrieremöglichkeiten nach dem MEM?'},{t:'Lernziele',q:'Was sind die Programmlernziele?'},{t:'Bewerbung',q:'Wie bewerbe ich mich und welche Fristen gelten?'}]},
+  FR:{ph:'Questions sur les cours, modules, professeurs...',wt:'Assistant MEM/MIM',wd:'Votre assistant IA pour les programmes MEM/MIM de HS Pforzheim. Questions en toute langue.',you:'Vous',
+  pills:['Leadership','Méthodes recherche','Achats stratégiques','Tech. émergentes','Gestion financière','Négo. B2B','Capstone','Mobilité future','Production','KPI','Produit','Restructuration'],
+  cards:[{t:'Structure',q:'Quels modules en Semestre 1 & 2 ?'},{t:'Cours',q:'Qui enseigne Achats stratégiques ?'},{t:'Évaluation',q:'Comment est noté le Capstone ?'},{t:'Carrière',q:'Débouchés après le MEM ?'},{t:'Objectifs',q:'Objectifs du programme ?'},{t:'Admission',q:'Comment postuler et quelles sont les dates limites ?'}]},
+  ES:{ph:'Preguntas sobre módulos, profesores, carreras...',wt:'Asistente MEM/MIM',wd:'Tu asistente IA para los programas MEM/MIM de HS Pforzheim. Preguntas en cualquier idioma.',you:'Tú',
+  pills:['Liderazgo','Métodos invest.','Compras estrat.','Tec. emergentes','Gestión financiera','Neg. B2B','Capstone','Movilidad futura','Producción','KPI','Producto','Reestructuración'],
+  cards:[{t:'Estructura',q:'¿Módulos en Semestre 1 y 2?'},{t:'Curso',q:'¿Quién enseña Compras Estratégicas?'},{t:'Evaluación',q:'¿Cómo se califica el Capstone?'},{t:'Carrera',q:'¿Salidas profesionales tras el MEM?'},{t:'Objetivos',q:'¿Objetivos del programa?'},{t:'Admisión',q:'¿Cómo solicitar y cuáles son los plazos?'}]},
+  ZH:{ph:'询问课程、模块、教授、职业相关问题...',wt:'MEM/MIM 课程助手',wd:'HS Pforzheim的MEM & MIM项目AI助手。任何语言均可提问。',you:'你',
+  pills:['领导力','研究方法','战略采购','新兴技术','财务管理','B2B谈判','毕业项目','未来出行','生产','KPI管理','产品策略','企业重组'],
+  cards:[{t:'课程结构',q:'MEM第1、2学期有哪些模块？'},{t:'课程信息',q:'谁教战略采购课？'},{t:'考核',q:'毕业项目如何评分？'},{t:'职业',q:'MEM毕业后的职业方向？'},{t:'目标',q:'项目的学习目标是什么？'},{t:'申请',q:'如何申请？截止日期是什么时候？'}]},
+  HI:{ph:'मॉड्यूल, प्रोफेसर, करियर के बारे में पूछें...',wt:'MEM/MIM कोर्स असिस्टेंट',wd:'HS Pforzheim के MEM & MIM प्रोग्राम का AI असिस्टेंट। किसी भी भाषा में पूछें।',you:'आप',
+  pills:['नेतृत्व','अनुसंधान','रणनीतिक खरीद','नई तकनीक','वित्त','B2B','कैपस्टोन','गतिशीलता','उत्पादन','KPI','उत्पाद','पुनर्संरचना'],
+  cards:[{t:'संरचना',q:'सेमेस्टर 1 व 2 में कौन से मॉड्यूल हैं?'},{t:'कोर्स',q:'रणनीतिक खरीद कौन पढ़ाते हैं?'},{t:'मूल्यांकन',q:'कैपस्टोन का मूल्यांकन कैसे होता है?'},{t:'करियर',q:'MEM के बाद करियर विकल्प?'},{t:'उद्देश्य',q:'प्रोग्राम के उद्देश्य?'},{t:'प्रवेश',q:'आवेदन कैसे करें और अंतिम तिथि?'}]},
+  PT:{ph:'Perguntas sobre módulos, professores, carreira...',wt:'Assistente MEM/MIM',wd:'Seu assistente IA para os programas MEM/MIM da HS Pforzheim. Perguntas em qualquer idioma.',you:'Você',
+  pills:['Liderança','Métodos pesquisa','Compras estrat.','Tec. emergentes','Gestão financeira','Neg. B2B','Capstone','Mobilidade','Produção','KPI','Produto','Reestruturação'],
+  cards:[{t:'Estrutura',q:'Módulos no Semestre 1 e 2?'},{t:'Curso',q:'Quem leciona Compras Estratégicas?'},{t:'Avaliação',q:'Como é avaliado o Capstone?'},{t:'Carreira',q:'Saídas profissionais após o MEM?'},{t:'Objetivos',q:'Objetivos de aprendizagem?'},{t:'Admissão',q:'Como candidatar e quais os prazos?'}]},
+  AR:{ph:'اسأل عن المقررات والأساتذة والمسار المهني...',wt:'مساعد مقررات MEM/MIM',wd:'مساعدك الذكي لبرامج MEM/MIM في HS Pforzheim. اسأل بأي لغة.',you:'أنت',
+  pills:['القيادة','مناهج البحث','المشتريات','التقنيات','الإدارة المالية','B2B','كابستون','التنقل','الإنتاج','KPI','المنتج','إعادة الهيكلة'],
+  cards:[{t:'الهيكل',q:'ما المقررات في الفصل 1 و 2؟'},{t:'معلومات',q:'من يدرّس المشتريات الاستراتيجية؟'},{t:'التقييم',q:'كيف يُقيَّم مشروع كابستون؟'},{t:'المسار المهني',q:'المسارات المهنية بعد MEM؟'},{t:'الأهداف',q:'أهداف البرنامج؟'},{t:'القبول',q:'كيف أتقدم وما هي المواعيد؟'}]},
+  JA:{ph:'コース、モジュール、教授、キャリアについて質問...',wt:'MEM/MIM コースアシスタント',wd:'HS PforzheimのMEM/MIMプログラムのAIアシスタント。あらゆる言語で質問できます。',you:'あなた',
+  pills:['リーダーシップ','研究方法','戦略的調達','新興技術','財務管理','B2B交渉','卒業PJ','モビリティ','生産','KPI','製品','企業再構築'],
+  cards:[{t:'カリキュラム',q:'第1・2学期のモジュールは？'},{t:'授業情報',q:'戦略的調達の担当教授は？'},{t:'評価方法',q:'卒業プロジェクトはどう評価されますか？'},{t:'キャリア',q:'MEM修了後のキャリアは？'},{t:'学習目標',q:'プログラムの学習目標は？'},{t:'入学',q:'出願方法と締め切りは？'}]},
+  KO:{ph:'강의, 모듈, 교수, 진로에 대해 질문하세요...',wt:'MEM/MIM 강의 어시스턴트',wd:'HS Pforzheim MEM/MIM 프로그램 AI 어시스턴트. 모든 언어로 질문 가능합니다.',you:'당신',
+  pills:['리더십','연구 방법','전략적 구매','신기술','재무 관리','B2B 협상','캡스톤','모빌리티','생산','KPI','제품','구조조정'],
+  cards:[{t:'커리큘럼',q:'1학기와 2학기 모듈은?'},{t:'강의 정보',q:'전략적 구매를 누가 가르치나요?'},{t:'평가',q:'캡스톤은 어떻게 평가되나요?'},{t:'진로',q:'MEM 후 진로는?'},{t:'학습 목표',q:'프로그램 학습 목표는?'},{t:'입학',q:'어떻게 지원하고 마감일은?'}]},
+};
+
+// ─── PROF. VOLZ VOICE ─────────────────────────────
+// Built from: raphaelvolz.de, HS Pforzheim profile, SoundCloud lecture recordings,
+// academic publications (h-index 40), GitHub repositories, and teaching history.
+const VOLZ_VOICE = `
+TEACHING PERSONA: Prof. Dr. Raphael Volz — HS Pforzheim Capstone Seminar
+
+BACKGROUND (informs style):
+- Full professor of Applied Computer Science & Data Science at HS Pforzheim since 2012
+- PhD summa cum laude from KIT (2004) in Web Ontology Reasoning
+- h-index 40 — serious researcher who values evidence and rigour
+- Founded tech consultancy (2008, sold 2022 to Moonshots GmbH); built outdoor navigation app (nogago); established holiday properties in Black Forest
+- Actively codes (GitHub: volzinnovation), contributes to open-source (OWL API, KAON)
+- Advocates strongly for open-source government software
+- Teaches: Data Science, AI, IT for Engineers, Capstone — all interdisciplinary
+- Communication style: prefers email, precise, encrypted, asynchronous — not social media
+- Practical and entrepreneurial: "The theory is only as good as its application"
+
+VOICE CHARACTERISTICS:
+- Systematic and structured: always breaks things into clear numbered points
+- Evidence-based: grounds claims in data, research, or concrete examples
+- Interdisciplinary connector: links engineering concepts to business implications and vice versa
+- Direct but encouraging: high standards, but genuinely wants students to succeed
+- Asks Socratic questions rather than just giving answers: "What do you think the data tells us here?"
+- Uses German technical terms naturally even in English explanations
+- Precise word choice — dislikes vagueness, imprecision, or unsupported claims
+- Practical examples from real projects, startups, and industry
+- When students are vague: gently but clearly asks for specificity — "Can you be more precise about what you mean by that?"
+- For Capstone specifically: emphasises synthesis of ALL program knowledge, not just one module
+- Signature phrases: "Let me structure this for you...", "The evidence suggests...", "From a practical standpoint...", "This connects directly to what you learned in [module]...", "Good question — let's break it down."
+- Ends explanations with a forward-looking question or challenge to deepen thinking
+`;
+
+// ─── KNOWLEDGE BASE ───────────────────────────────
+const KB = `=== HOCHSCHULE PFORZHEIM — MEM & MIM MASTER PROGRAMS (SPO 2024) ===
+
+PROGRAMS:
+1. MEM — Engineering and Management (M.Sc.) | Director: Prof. Dr. Ansgar Kühn | 3 semesters
+   Apply: WS26/27 by 15 June | Winter by 15 January | campus.hs-pforzheim.de
+   Features: small groups (20-25), electives all 3 faculties, Double Degree Taiwan Tech, semester abroad
+   Career: strategic procurement, product management, project management, production, controlling
+
+2. MIM — Industrial Management (M.Sc.) | English Track available
+   Director: Prof. Dr. Ansgar Kühn (Tel: 07231-286490)
+   Content: Technology & Innovation, Leadership, Process & Data Management, Networked Systems & AI
+
+GRADING: 1.0=Sehr gut(excellent), 2.0=Gut(good), 3.0=Befriedigend(satisfactory), 4.0=Ausreichend(pass), 5.0=Fail. UPL=pass/fail.
+1 ECTS = 25-30 work hours. PLH=paper(20-40pp), PLK=exam, PLP=project(40-60pp), PLR=presentation, PLT=thesis(70-100pp).
+
+PROGRAM LEARNING OUTCOMES:
+1. Responsible Leadership: principles, ethics, sustainability
+2. Creative Problem-Solving: identify, analyse, solve, communicate
+3. Research Competence: apply methods, achieve reliable results
+4. Interdisciplinary Work: engineering-business expertise, project management
+
+=== MODULES SPO 2024 ===
+
+MODULE 1 LEADERSHIP (MWI10001) Sem1 | 6 ECTS | German/English | Director: Prof. Dr. Kühn
+  MWI10002 Führung — Dr. Dieter Lederer — PLH/PLR — leadership styles, values, communication, body language
+  MWI10003 Führung in Projekten — Sven Bemmé — PLP/PLH/PLR — project mgmt, conflict, moderation
+
+MODULE 2 PRODUKTIONSSTRATEGIE (MWI10004) Sem1 | 6 ECTS | German | PLK 90min
+  MWI10005 Produktionsstrategie — Dr. Delang — Value Stream Mapping, BPM, Value Engineering
+  MWI10006 Lean Management — Prof. Dr. Emmerich — Lean philosophy, production systems, productivity
+
+MODULE 3 FORSCHUNGSMETHODEN & INNOVATION (MWI10007) Sem1 | 6 ECTS | German/English
+Director: Prof. Dr. Hinderer | MIM & MEM compulsory
+  MWI10008 Forschungsmethoden — Prof. Dr. Ludwig Martin / Prof. Dr. Rebecca Bulander
+  MWI10009 Produktstrategie/Produktentwicklung — Prof. Dr. Rainer Wunderlich / Prof. Dr. Hinderer
+
+MODULE 4 INNOVATIONS-/FORSCHUNGSPROJEKT (MWI10010) Sem1/2 | 9 ECTS | Groups of 4
+Director: Prof. Dr. Kühn | MWI10011 Konzeption (3 ECTS) | MWI10012 Realisierung (6 ECTS)
+
+MODULE 5 VALUE BASED MANAGEMENT (MWI10013) Sem2 | 6 ECTS | English | PLK 45min
+Director: Prof. Schnell
+  MWI10014 Financial Management & Control — Prof. Harald Schnell — Part 2
+  MWI10015 KPI Management — Prof. Dr. Bingwen Yan — Part 1
+Topics: EVA, SVA, ROI, CFROI, budgeting, IFRS/US-GAAP
+
+MODULE 6 MANAGEMENT NEUER TECHNOLOGIEN (MWI10016) Sem2 | 6 ECTS | English
+Director: Prof. Dr. Kölmel
+  MWI10017 Technische Konzepte — Prof. Dr. Thomas Schuster
+  MWI10018 Organisatorische Konzepte — Prof. Dr. Kölmel
+Topics: IoT, Cloud Computing, technology management, digital business models, prototyping
+
+MODULE 7 CROSS BORDER COOPERATION (MWI10019) Sem2 | 6 ECTS | PLP
+Director: Prof. Dr. Kühn | Company project + international excursion
+Topics: internationalisation, HRM, global SCM, intercultural management
+
+MODULE 8 MANAGING THE VALUE CHAIN (MWI10020) Sem1/2 | 6 ECTS | MEM & MIM compulsory
+Directors: Prof. Dr. Bulander, Prof. Dr. Peter
+  MWI10021 Geschäftsprozessmanagement — Prof. Dr. Bulander — German — BPMN, BPM, process mining
+  MWI10022 Strategic Procurement — Prof. Dr. Peter — English — sourcing, supplier mgmt, make-or-buy
+
+MODULE 9 ELECTIVES (MWI10023) Sem1/2 | 9 ECTS — 3 courses from all 3 HS Pforzheim faculties
+
+MODULE 10 CAPSTONE (MWI10027) Sem3 | 6 ECTS | Prereq: ALL courses | Director: Prof. Dr. Kühn
+  MWI10028 Capstone Seminar — Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter
+    Assessment: Team participation 60% + Presentations 40%. Full attendance required.
+  COL6996 Fachwissenschaftliches Kolloquium — UPL (pass/fail)
+
+MODULE 11 MASTER-THESIS (THE6880) Sem3 | 24 ECTS | 6 months | 70-100 pages
+
+=== SS2026 SYLLABI ===
+
+MWI10008 RESEARCH METHODS
+Prof. Dr. Ludwig Martin | ludwig.martin@hs-pforzheim.de | +49 7231 28 6186 | Office T1.3.25
+3 ECTS | English | Prereq: English C1, Statistics 1
+Assessment: Groups ~2 — 20-30min presentation + written paper
+Topics: Research paradigms, scientific ethics, plagiarism, AI in academic work
+
+MWI10009 PRODUKTSTRATEGIE / PRODUKTENTWICKLUNG
+Prof. Dr. Rainer Wunderlich | rainer.wunderlich@hs-pforzheim.de | 07231 28-6677 | Office T1.5.26
+3 ECTS | German | Start: 18.03.2026 | Wed 08:00-09:45 + Mondays
+Assessment: Presentation 20% + Written 70% + Discussion 10%
+Topics: Design Thinking, BMC, Lean Canvas, product idea to business model
+
+MWI10014 FINANCIAL MANAGEMENT AND CONTROL
+Prof. Harald Schnell | harald.schnell@hs-pforzheim.de | 07231 28-6684 | Office T1.3.28
+3 ECTS | English | Start: Wed 18.03.2026
+Structure: Business Simulation (CEO of Robert Wash Ltd) + workshops + seminar papers
+Topics: target costing, life cycle costing, budgeting, make vs buy, contribution margin, company valuation
+
+MWI10015 MANAGEMENT BY KEY PERFORMANCE INDICATORS
+Prof. Dr. Bingwen Yan | b.yan@lb.hs-pforzheim.de | Start: Thursday 09 April 2026
+3 ECTS | English
+Topics: KPI frameworks, balance sheet/P&L/cash flow, EVA/ROI/ROCE/ROE, digital controlling, crisis mgmt
+
+MWI10016 MANAGING OF EMERGING TECHNOLOGIES
+Dr. Michael Krutwig | michael@krutwig.com | via MS Teams
+6 ECTS | English | Topics: Emerging Tech Radar, Cloud, IoT, Blockchain, AI, Additive Manufacturing
+
+MWI10022 STRATEGIC PROCUREMENT
+Prof. Dr. Moritz Peter | Moritz.peter@hs-pforzheim.de | (07231) 28-6671 | Office T2.3.12 | Wed 15:30-17:00
+3 ECTS | English | Topics: Sourcing, supplier management, procurement strategy, Porsche AG case studies
+
+MWI10028 CAPSTONE SEMINAR
+Prof. Dr. Raphael Volz + Prof. Dr. Moritz Peter | raphael.volz@hs-pforzheim.de | Office T2.5.13
+4 ECTS | Prereq: ALL courses | Team participation 60% + Presentations 40%
+
+MWI10061 GRUNDLAGEN DER INDUSTRIELLEN PRODUKTION
+Prof. Dr. H. Emmerich | herbert.emmerich@hs-pforzheim.de | 07231/28-6664 | Office T1.3.23
+3 ECTS | German | Wed 15:30-17:00 | Assessment: Written Klausur
+
+MWI10069 NEGOTIATIONS B2B
+Prof. Dr. Moritz Peter | Moritz.peter@hs-pforzheim.de | (07231) 286671
+3 ECTS | English | 3 phases: Pre-bargaining → Bargaining → Closing
+
+BAE5028 FUTURE MOBILITY (ELECTIVE)
+Prof. Dr. Guy Fournier | guy.fournier@hs-pforzheim.de | 07231 28-6546
+3 ECTS | German | Block: 08.06, 15.06, 18.06, 19.06.2026
+
+BAE5153 UNTERNEHMENSRESTRUKTURIERUNG (ELECTIVE)
+Volker Wintergerst | Volker.Wintergerst@wintergerst.com | +49 171 7666633
+3 ECTS | German | Assessment: Presentation 30% + Written 50% + Discussion 20%
+
+KEY CONTACTS:
+  Program Director: Prof. Dr. Ansgar Kühn — 07231-286490
+  Prof. Dr. Raphael Volz (Capstone, AI) — raphael.volz@hs-pforzheim.de — Office T2.5.13
+  Prof. Dr. Moritz Peter (Procurement/Negotiations/Capstone) — Moritz.peter@hs-pforzheim.de — (07231) 28-6671
+  Prof. Dr. Ludwig Martin (Research Methods) — ludwig.martin@hs-pforzheim.de — +49 7231 28 6186
+  Prof. Harald Schnell (Financial Mgmt) — harald.schnell@hs-pforzheim.de — 07231 28-6684
+  Prof. Dr. Bingwen Yan (KPI) — b.yan@lb.hs-pforzheim.de
+  Prof. Dr. Rainer Wunderlich (Produktstrategie) — rainer.wunderlich@hs-pforzheim.de — 07231 28-6677
+  Prof. Dr. Guy Fournier (Future Mobility) — guy.fournier@hs-pforzheim.de — 07231 28-6546
+  Prof. Dr. H. Emmerich (Production) — herbert.emmerich@hs-pforzheim.de — 07231/28-6664
+  Dr. Michael Krutwig (Emerging Tech) — michael@krutwig.com
+  Volker Wintergerst (Restrukturierung) — Volker.Wintergerst@wintergerst.com — +49 171 7666633`;
+
+// ─── STATE ────────────────────────────────────────
+let lang='EN', history=[], busy=false;
+const t = k => L[lang]?.[k] ?? L.EN[k] ?? k;
+
+// ─── LANGUAGE ─────────────────────────────────────
+function setLang(){
+  lang = document.getElementById('ls').value;
+  document.documentElement.lang = lang.toLowerCase();
+  document.body.dir = lang==='AR' ? 'rtl' : 'ltr';
+  document.getElementById('inp').placeholder = t('ph');
+  const w = document.getElementById('wlc');
+  if(w){
+    document.getElementById('wt').textContent = t('wt');
+    document.getElementById('wd').textContent = t('wd');
+    renderPills(); renderCards();
+  }
+}
+function renderPills(){
+  const c=document.getElementById('wp'); if(!c)return; c.innerHTML='';
+  (t('pills')||[]).forEach(p=>{
+    const d=document.createElement('div'); d.className='pill'; d.textContent=p; c.appendChild(d);
+  });
+}
+function renderCards(){
+  const c=document.getElementById('wg'); if(!c)return; c.innerHTML='';
+  (t('cards')||[]).forEach(({t:tag,q})=>{
+    const d=document.createElement('div'); d.className='card'; d.onclick=()=>ask(q);
+    d.innerHTML=`<b>${tag}</b>${q}`; c.appendChild(d);
+  });
+}
+
+// ─── SYSTEM PROMPT ────────────────────────────────
+function sysPrompt(){
+  return `You are the MEM/MIM Course Assistant for Hochschule Pforzheim, Germany.
+${VOLZ_VOICE}
+
+LANGUAGE RULE: Detect the language of every user message and always respond in that SAME language. German = German. English = English. Hindi = Hindi. Always match the user's language.
+
+CONTENT RULES:
+- Answer only from the knowledge base below
+- Structure answers clearly with numbered points or bullets
+- Always include professor email addresses when contact is asked about
+- If something is not covered in the knowledge base, say so clearly and suggest contacting the relevant professor
+- Use Prof. Volz's voice: systematic, evidence-based, practical, encouraging
+
+${KB}`;
+}
+
+// ─── SEND ─────────────────────────────────────────
+async function send(){
+  if(busy) return;
+  const inp = document.getElementById('inp');
+  const text = inp.value.trim(); if(!text) return;
+  inp.value=''; rsz(inp); hideWelcome();
+  addMsg('u', text);
+  history.push({role:'user', content:text});
+  busy=true; document.getElementById('snd').disabled=true;
+  const tid = showTyping();
+  try{
+    const res = await fetch(PROXY, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1024,
+        system: sysPrompt(),
+        messages: history
+      })
+    });
+    const data = await res.json();
+    hideTyping(tid);
+    if(data.error){
+      addMsg('b','⚠ '+( data.error.message||JSON.stringify(data.error)));
+    } else {
+      const reply = data?.content?.[0]?.text;
+      if(reply){
+        addMsg('b', reply);
+        history.push({role:'assistant', content:reply});
+      } else {
+        addMsg('b','⚠ Empty response — please try again.');
+      }
+    }
+  }catch(e){
+    hideTyping(tid);
+    addMsg('b','⚠ '+e.message);
+  }
+  busy=false; document.getElementById('snd').disabled=false;
+}
+
+function ask(q){ document.getElementById('inp').value=q; send(); }
+function hideWelcome(){ const w=document.getElementById('wlc'); if(w) w.remove(); }
+
+let tc=0;
+function showTyping(){
+  const id='tp'+(++tc), c=document.getElementById('msgs'), d=document.createElement('div');
+  d.className='msg b'; d.id=id;
+  d.innerHTML=`<div class="av" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 0 10px rgba(139,92,246,.4)">RV</div><div class="bbl"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return id;
+}
+function hideTyping(id){ const e=document.getElementById(id); if(e) e.remove(); }
+
+function addMsg(role, text){
+  const c=document.getElementById('msgs'), d=document.createElement('div');
+  d.className='msg '+role;
+  const lbl = role==='u' ? t('you') : 'RV';
+  const av = role==='u'
+    ? `<div class="av">${lbl}</div>`
+    : `<div class="av" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 0 10px rgba(139,92,246,.4)">${lbl}</div>`;
+  d.innerHTML=`${av}<div class="bbl">${fmt(text)}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+function fmt(s){
+  return s
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<strong style="color:#a78bfa;font-size:13px">$1</strong>')
+    .replace(/^## (.+)$/gm,'<strong style="font-size:14px;color:#c4b5fd">$1</strong>')
+    .replace(/^- (.+)$/gm,'&nbsp;&nbsp;• $1')
+    .replace(/^\d+\. (.+)$/gm, m => m)
+    .replace(/\n/g,'<br>');
+}
+
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(!busy) send(); }}
+function rsz(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+
+setLang();
+</script>
+</body>
+</html>
