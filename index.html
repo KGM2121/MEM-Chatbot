@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ask MEM/MIM — your campus copilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+:root{
+  /* Modern fintech: charcoal + lime green + soft accents */
+  --bg:#0a0a0c;
+  --bg2:#111114;
+  --bg3:#16161b;
+  --bg-soft:#1c1c22;
+  --line:rgba(255,255,255,.06);
+  --line2:rgba(255,255,255,.12);
+  --tx:#fafafa;
+  --tx2:#b4b4bd;
+  --tx3:#7a7a85;
+  --mute:#4a4a55;
+  /* Brand accent: warm lime/yellow-green (fintech feel) */
+  --br:#d8ff3a;
+  --br-d:#b3da1f;
+  --br-soft:rgba(216,255,58,.12);
+  --br-glow:rgba(216,255,58,.35);
+  /* User bubble accent */
+  --user:#1f2a14;
+  --user-bdr:rgba(216,255,58,.25);
+}
+body{
+  font-family:'Geist',-apple-system,sans-serif;
+  background:var(--bg);color:var(--tx);
+  display:flex;flex-direction:column;
+}
+
+/* ── HEADER ── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;background:rgba(10,10,12,.85);
+  border-bottom:1px solid var(--line);flex-shrink:0;
+  backdrop-filter:blur(20px);position:relative;z-index:10;
+}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-logo{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:var(--br);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;
+  color:#0a0a0c;letter-spacing:-0.5px;
+}
+.brand-text .t1{font-size:10px;color:var(--tx3);letter-spacing:.03em;font-weight:500}
+.brand-text .t2{font-size:14px;color:var(--tx);font-weight:600;letter-spacing:-0.01em;margin-top:1px}
+.hdr-status{
+  display:flex;align-items:center;gap:6px;
+  font-size:11.5px;color:var(--tx2);font-family:'JetBrains Mono',monospace;
+}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--br);box-shadow:0 0 8px var(--br-glow);animation:livePulse 2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.5}}
+.lang-sel{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:7px;
+  color:var(--tx);font-size:12px;font-family:'Geist',sans-serif;font-weight:500;
+  padding:6px 26px 6px 11px;outline:none;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a85'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+  transition:all .15s;
+}
+.lang-sel:hover{border-color:var(--br);color:var(--br)}
+.lang-sel option{background:var(--bg-soft)}
+
+/* ── CHAT ── */
+.chat{display:flex;flex-direction:column;flex:1;overflow:hidden;background:var(--bg)}
+.msgs{
+  flex:1;overflow-y:auto;padding:24px 0;display:flex;flex-direction:column;gap:18px;
+  scroll-behavior:smooth;
+}
+.msgs::-webkit-scrollbar{width:6px}
+.msgs::-webkit-scrollbar-thumb{background:var(--bg-soft);border-radius:6px}
+.msgs::-webkit-scrollbar-thumb:hover{background:var(--mute)}
+
+/* ── WELCOME ── */
+.welcome{
+  margin:auto;max-width:680px;padding:24px 24px;text-align:center;
+  animation:slideUp .5s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.greet-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--br-soft);color:var(--br);
+  padding:6px 14px;border-radius:30px;font-size:11.5px;font-weight:500;
+  margin-bottom:18px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em;
+  border:1px solid rgba(216,255,58,.2);
+}
+.greet-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--br);animation:livePulse 2s ease-in-out infinite}
+
+.welcome h1{
+  font-size:34px;font-weight:600;color:var(--tx);
+  letter-spacing:-0.025em;line-height:1.15;margin-bottom:14px;
+}
+.welcome h1 .accent{
+  background:linear-gradient(135deg,var(--br) 0%,#9fed3e 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.welcome .lead{
+  font-size:15px;color:var(--tx2);line-height:1.6;
+  max-width:520px;margin:0 auto 26px;font-weight:400;
+}
+
+.fun-fact{
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:11px 14px;margin-bottom:22px;font-size:12.5px;color:var(--tx2);
+  display:flex;align-items:center;gap:10px;text-align:left;
+}
+.fun-fact-ico{font-size:16px;flex-shrink:0}
+.fun-fact .ff-label{color:var(--br);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+
+.section-tag{
+  font-size:10.5px;font-weight:600;color:var(--tx3);
+  text-transform:uppercase;letter-spacing:.12em;
+  text-align:left;margin:0 0 11px 4px;font-family:'JetBrains Mono',monospace;
+}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;text-align:left}
+.card{
+  background:var(--bg2);border:1px solid var(--line);border-radius:11px;
+  padding:13px 14px;cursor:pointer;transition:all .18s cubic-bezier(0.4,0,0.2,1);
+  display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--br),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.card:hover{border-color:rgba(216,255,58,.4);background:var(--bg3);transform:translateY(-1px)}
+.card:hover::before{opacity:1}
+.card-head{display:flex;align-items:center;gap:8px}
+.card-ico{font-size:14px}
+.card-tag{
+  font-size:10px;color:var(--br);font-weight:600;
+  text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;
+}
+.card-q{font-size:13px;color:var(--tx);line-height:1.45;font-weight:450}
+
+/* ── MESSAGES ── */
+.msg-row{width:100%;display:flex;justify-content:center}
+.msg-inner{width:100%;max-width:760px;padding:0 24px;display:flex;gap:13px;animation:fadeUp .25s ease}
+.msg-inner.u{flex-direction:row-reverse}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.avatar{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;
+}
+.u .avatar{background:var(--bg-soft);border:1px solid var(--line2);color:var(--tx2)}
+.b .avatar{background:var(--br);color:#0a0a0c}
+
+.bubble-wrap{display:flex;flex-direction:column;gap:7px;max-width:calc(100% - 50px)}
+.u .bubble-wrap{align-items:flex-end}
+
+.bubble{
+  padding:12px 16px;border-radius:12px;font-size:14.5px;line-height:1.65;
+  font-weight:400;
+}
+.u .bubble{
+  background:var(--user);color:var(--tx);
+  border:1px solid var(--user-bdr);border-bottom-right-radius:3px;
+}
+.b .bubble{
+  background:var(--bg2);color:var(--tx);
+  border:1px solid var(--line);border-bottom-left-radius:3px;
+}
+.b .bubble strong{color:var(--br);font-weight:600}
+.b .bubble h3{font-size:14px;color:var(--tx);margin:8px 0 4px;font-weight:600}
+.b .bubble code{
+  background:var(--bg-soft);color:var(--br);padding:1px 6px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+}
+
+.msg-tools{display:flex;gap:6px;align-items:center}
+.tool-btn{
+  background:transparent;border:1px solid var(--line);border-radius:7px;
+  color:var(--tx3);font-size:11.5px;padding:4px 10px;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
+  font-family:'Geist',sans-serif;font-weight:500;
+}
+.tool-btn:hover{border-color:var(--br);color:var(--br)}
+.tool-btn.active{border-color:var(--br);color:var(--br);background:var(--br-soft)}
+
+/* Typing */
+.dots{display:flex;gap:5px;align-items:center;padding:3px 2px}
+.dots span{
+  width:6px;height:6px;border-radius:50%;background:var(--br);
+  opacity:.4;animation:dotBlink 1.2s infinite;
+}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotBlink{0%,70%,100%{opacity:.3;transform:scale(1)}35%{opacity:1;transform:scale(1.3)}}
+
+/* ── INPUT ── */
+.input-zone{
+  flex-shrink:0;background:var(--bg);
+  border-top:1px solid var(--line);padding:14px 0 18px;
+}
+.input-wrap{max-width:760px;margin:0 auto;padding:0 24px}
+.input-box{
+  display:flex;align-items:flex-end;gap:8px;
+  background:var(--bg2);border:1.5px solid var(--line2);border-radius:14px;
+  padding:9px 9px 9px 16px;transition:all .2s;
+}
+.input-box:focus-within{border-color:var(--br);box-shadow:0 0 0 3px rgba(216,255,58,.08)}
+textarea{
+  flex:1;background:none;border:none;outline:none;color:var(--tx);
+  font-family:'Geist',sans-serif;font-size:14.5px;resize:none;
+  max-height:120px;min-height:24px;line-height:1.5;padding:5px 0;font-weight:400;
+}
+textarea::placeholder{color:var(--tx3)}
+.mic-btn,.send-btn,.halt-btn{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;
+}
+.mic-btn{background:var(--bg-soft);border:1px solid var(--line);color:var(--tx2)}
+.mic-btn:hover{border-color:var(--br);color:var(--br)}
+.mic-btn.listening{background:var(--br);color:#0a0a0c;border-color:var(--br);animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 var(--br-glow)}50%{box-shadow:0 0 0 8px rgba(216,255,58,0)}}
+.mic-btn svg{width:17px;height:17px}
+
+.send-btn{background:var(--br);color:#0a0a0c}
+.send-btn:hover{background:var(--br-d);transform:translateY(-1px)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.send-btn svg{width:16px;height:16px}
+
+.halt-btn{background:#ff4d4d;color:#fff;display:none}
+.halt-btn:hover{background:#e63d3d;transform:translateY(-1px)}
+.halt-btn svg{width:14px;height:14px}
+body.processing .send-btn{display:none}
+body.processing .halt-btn{display:flex}
+
+.input-hint{
+  max-width:760px;margin:9px auto 0;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:10.5px;color:var(--tx3);font-family:'JetBrains Mono',monospace;
+}
+.hint-keys kbd{
+  background:var(--bg2);border:1px solid var(--line);border-radius:4px;
+  padding:1px 5px;color:var(--tx2);font-family:'JetBrains Mono',monospace;font-size:10px;
+}
+.voice-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.voice-toggle .sw{
+  width:30px;height:17px;border-radius:10px;background:var(--bg-soft);
+  position:relative;transition:background .2s;border:1px solid var(--line2);
+}
+.voice-toggle .sw::after{
+  content:'';position:absolute;width:11px;height:11px;border-radius:50%;
+  background:var(--tx3);top:2px;left:2px;transition:all .2s;
+}
+.voice-toggle.on .sw{background:var(--br-soft);border-color:var(--br)}
+.voice-toggle.on .sw::after{left:16px;background:var(--br)}
+
+/* Listening banner */
+.listening-banner{
+  max-width:760px;margin:0 auto 8px;padding:0 24px;
+  display:none;align-items:center;gap:10px;
+  font-size:13px;color:var(--br);font-weight:500;font-family:'JetBrains Mono',monospace;
+}
+.listening-banner.show{display:flex}
+.wave{display:flex;gap:2px;align-items:center;height:18px}
+.wave span{width:3px;background:var(--br);border-radius:2px}
+.wave span:nth-child(1){animation:wave .8s infinite 0s;height:8px}
+.wave span:nth-child(2){animation:wave .8s infinite .15s;height:14px}
+.wave span:nth-child(3){animation:wave .8s infinite .3s;height:10px}
+.wave span:nth-child(4){animation:wave .8s infinite .45s;height:16px}
+@keyframes wave{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="brand">
+    <div class="brand-logo">M/M</div>
+    <div class="brand-text">
+      <div class="t1">Hochschule Pforzheim · Faculty of Engineering</div>
+      <div class="t2" id="brandT2">MEM / MIM Copilot</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="hdr-status"><span class="dot-live"></span><span id="liveLabel">live</span></div>
+    <select class="lang-sel" id="ls" onchange="setLang()">
+      <option value="EN">🇬🇧 EN</option>
+      <option value="DE">🇩🇪 DE</option>
+      <option value="FR">🇫🇷 FR</option>
+      <option value="ES">🇪🇸 ES</option>
+      <option value="ZH">🇨🇳 ZH</option>
+      <option value="HI">🇮🇳 HI</option>
+      <option value="PT">🇧🇷 PT</option>
+      <option value="AR">🇸🇦 AR</option>
+      <option value="JA">🇯🇵 JA</option>
+      <option value="KO">🇰🇷 KO</option>
+    </select>
+  </div>
+</div>
+
+<div class="chat">
+  <div class="msgs" id="msgs">
+    <div class="welcome" id="wlc">
+      <div class="greet-tag" id="wbadge">your campus copilot</div>
+      <h1 id="wt">Hey 👋 <span class="accent">What's up?</span></h1>
+      <p class="lead" id="wd">I'm your copilot for the MEM &amp; MIM master programs at HS Pforzheim. Ask about modules, profs, deadlines, or get help understanding the actual stuff you're studying. Type or hit the mic.</p>
+      <div class="fun-fact" id="funfact">
+        <span class="fun-fact-ico">💎</span>
+        <div><span class="ff-label" id="ffLabel">did you know</span><br><span id="ffText">Pforzheim is the "Goldstadt" — it makes 75% of all jewellery and watches in Germany. Your campus literally sits on a goldmine of design heritage.</span></div>
+      </div>
+      <div class="section-tag" id="wct">try these</div>
+      <div class="grid" id="wg"></div>
+    </div>
+  </div>
+
+  <div class="input-zone">
+    <div class="listening-banner" id="listenBanner">
+      <div class="wave"><span></span><span></span><span></span><span></span></div>
+      <span id="listenText">listening...</span>
+    </div>
+    <div class="input-wrap">
+      <div class="input-box">
+        <textarea id="inp" rows="1" onkeydown="onKey(event)" oninput="rsz(this)"
+          placeholder="ask anything..."></textarea>
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <button class="send-btn" id="snd" onclick="send()" title="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
+        <button class="halt-btn" id="halt" onclick="halt()" title="Stop">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="input-hint">
+      <div class="hint-keys"><kbd>Enter</kbd> send <kbd>Shift+Enter</kbd> newline <kbd>Esc</kbd> stop</div>
+      <div class="voice-toggle on" id="voiceToggle" onclick="toggleVoiceOut()">
+        <span id="voiceLabel">voice on</span>
+        <div class="sw"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROXY = 'https://hspfchatbot.kaushalgmore.workers.dev/';
+const MODEL = 'claude-haiku-4-5-20251001';
+
+const L = {
+  EN:{ph:'ask anything...',badge:'your campus copilot',brandT2:'MEM / MIM Copilot',live:'live',
+  wt:'Hey 👋 <span class="accent">What\\'s up?</span>',
+  wd:"I'm your copilot for the MEM & MIM master programs at HS Pforzheim. Ask about modules, profs, deadlines, or get help understanding the actual stuff you're studying. Type or hit the mic.",
+  ffLabel:'did you know',
+  ffText:'Pforzheim is the "Goldstadt" — it makes 75% of all jewellery and watches in Germany. Your campus literally sits on a goldmine of design heritage.',
+  ct:'try these',you:'You',bot:'M/M',von:'voice on',voff:'voice off',listen:'listening...',
+  cards:[
+    {i:'🧭',t:'structure',q:'What modules are in Semester 1 & 2 of MEM?'},
+    {i:'👤',t:'professor',q:'Tell me about Prof. Volz — what he teaches, where his office is, when his hours are'},
+    {i:'📋',t:'capstone',q:'How is the Capstone graded exactly?'},
+    {i:'💡',t:'concept',q:'Explain the Kraljic Matrix and how to actually use it'},
+    {i:'🎯',t:'career',q:'Real career paths after MEM? Be honest.'},
+    {i:'📅',t:'admission',q:'When are the application deadlines and what do I need?'},
+  ]},
+  DE:{ph:'frag mich was...',badge:'dein campus copilot',brandT2:'MEM / MIM Copilot',live:'live',
+  wt:'Hey 👋 <span class="accent">Was geht?</span>',
+  wd:"Ich bin dein Copilot für die MEM & MIM Master-Programme an der HS Pforzheim. Frag nach Modulen, Profs, Fristen — oder lass dir den Stoff erklären. Tippen oder Mikro drücken.",
+  ffLabel:'wusstest du',
+  ffText:'Pforzheim ist die "Goldstadt" — hier werden 75% aller Schmuck- und Uhrenprodukte Deutschlands hergestellt. Dein Campus steht buchstäblich auf einem Goldgrund.',
+  ct:'versuch das',you:'Du',bot:'M/M',von:'sprache an',voff:'sprache aus',listen:'höre zu...',
+  cards:[
+    {i:'🧭',t:'struktur',q:'Welche Module gibt es im Semester 1 & 2 des MEM?'},
+    {i:'👤',t:'professor',q:'Erzähl mir über Prof. Volz — was er lehrt, wo sein Büro ist, wann seine Sprechzeiten sind'},
+    {i:'📋',t:'capstone',q:'Wie genau wird das Capstone bewertet?'},
+    {i:'💡',t:'konzept',q:'Erklär mir die Kraljic-Matrix — und wie man sie wirklich nutzt'},
+    {i:'🎯',t:'karriere',q:'Echte Karrierewege nach dem MEM? Sei ehrlich.'},
+    {i:'📅',t:'bewerbung',q:'Wann sind die Bewerbungsfristen und was brauche ich?'},
+  ]},
+  FR:{ph:'demande-moi...',badge:'ton copilote campus',brandT2:'Copilote MEM / MIM',live:'live',
+  wt:'Salut 👋 <span class="accent">Quoi de neuf?</span>',
+  wd:"Je suis ton copilote pour les masters MEM & MIM à HS Pforzheim. Modules, profs, échéances, ou comprendre la matière. Tape ou appuie sur le micro.",
+  ffLabel:'le sais-tu',
+  ffText:'Pforzheim est la "Goldstadt" — 75% de la bijouterie et horlogerie allemande viennent d\\'ici.',
+  ct:'essaye ça',you:'Toi',bot:'M/M',von:'voix on',voff:'voix off',listen:'écoute...',
+  cards:[
+    {i:'🧭',t:'structure',q:'Quels modules en Semestre 1 & 2 du MEM?'},
+    {i:'👤',t:'professeur',q:'Parle-moi du Prof. Volz — ce qu\\'il enseigne, son bureau, ses horaires'},
+    {i:'📋',t:'capstone',q:'Comment exactement est noté le Capstone?'},
+    {i:'💡',t:'concept',q:'Explique la matrice de Kraljic et comment l\\'utiliser'},
+    {i:'🎯',t:'carrière',q:'Vrais débouchés après le MEM? Sois honnête.'},
+    {i:'📅',t:'admission',q:'Dates limites et exigences?'},
+  ]},
+  ES:{ph:'pregúntame...',badge:'tu copiloto del campus',brandT2:'Copiloto MEM / MIM',live:'live',
+  wt:'Hey 👋 <span class="accent">¿Qué onda?</span>',
+  wd:"Soy tu copiloto para los másteres MEM & MIM en HS Pforzheim. Pregunta sobre módulos, profes, fechas o entender lo que estudias. Escribe o usa el micro.",
+  ffLabel:'sabías que',
+  ffText:'Pforzheim es la "Goldstadt" — produce 75% de la joyería y relojería de Alemania.',
+  ct:'prueba',you:'Tú',bot:'M/M',von:'voz on',voff:'voz off',listen:'escuchando...',
+  cards:[
+    {i:'🧭',t:'estructura',q:'¿Módulos en Semestre 1 y 2 del MEM?'},
+    {i:'👤',t:'profesor',q:'Cuéntame sobre Prof. Volz — qué enseña, dónde su despacho, horarios'},
+    {i:'📋',t:'capstone',q:'¿Cómo se califica exactamente el Capstone?'},
+    {i:'💡',t:'concepto',q:'Explica la Matriz de Kraljic y cómo se usa de verdad'},
+    {i:'🎯',t:'carrera',q:'¿Salidas reales tras el MEM? Sé honesto.'},
+    {i:'📅',t:'admisión',q:'¿Plazos y requisitos?'},
+  ]},
+  ZH:{ph:'问我...',badge:'你的校园副驾',brandT2:'MEM/MIM 副驾',live:'实时',
+  wt:'嘿 👋 <span class="accent">怎么了？</span>',
+  wd:'我是你在HS Pforzheim MEM/MIM硕士项目的副驾。问课程、教授、截止日期，或帮你理解所学内容。打字或按麦克风。',
+  ffLabel:'你知道吗',
+  ffText:'Pforzheim被称为"黄金之城"——德国75%的珠宝和钟表都在这里制造。',
+  ct:'试试这些',you:'你',bot:'M/M',von:'语音开',voff:'语音关',listen:'聆听中...',
+  cards:[
+    {i:'🧭',t:'结构',q:'MEM第1、2学期有哪些模块？'},
+    {i:'👤',t:'教授',q:'介绍Volz教授——他教什么、办公室、办公时间'},
+    {i:'📋',t:'毕业项目',q:'毕业项目具体如何评分？'},
+    {i:'💡',t:'概念',q:'解释克拉杰里克矩阵以及如何使用'},
+    {i:'🎯',t:'职业',q:'MEM后真实的职业方向？说实话。'},
+    {i:'📅',t:'申请',q:'申请截止日期和要求？'},
+  ]},
+  HI:{ph:'कुछ भी पूछो...',badge:'तुम्हारा कैंपस कोपायलट',brandT2:'MEM/MIM कोपायलट',live:'live',
+  wt:'हे 👋 <span class="accent">क्या हाल?</span>',
+  wd:'मैं HS Pforzheim के MEM/MIM मास्टर प्रोग्राम के लिए तुम्हारा कोपायलट हूं। मॉड्यूल, प्रोफेसर, डेडलाइन या जो पढ़ रहे हो उसे समझने में मदद। टाइप करो या माइक दबाओ।',
+  ffLabel:'क्या तुम्हें पता है',
+  ffText:'Pforzheim "Goldstadt" है — जर्मनी की 75% ज्वैलरी और घड़ियां यहीं बनती हैं।',
+  ct:'ये पूछो',you:'तुम',bot:'M/M',von:'आवाज़ on',voff:'आवाज़ off',listen:'सुन रहा हूं...',
+  cards:[
+    {i:'🧭',t:'संरचना',q:'MEM के सेमेस्टर 1 व 2 में कौन से मॉड्यूल हैं?'},
+    {i:'👤',t:'प्रोफेसर',q:'Prof. Volz के बारे में बताओ — वो क्या पढ़ाते हैं, ऑफिस कहां, घंटे क्या'},
+    {i:'📋',t:'कैपस्टोन',q:'कैपस्टोन का मूल्यांकन कैसे?'},
+    {i:'💡',t:'अवधारणा',q:'क्रालजिक मैट्रिक्स समझाओ और कैसे इस्तेमाल करें'},
+    {i:'🎯',t:'करियर',q:'MEM के बाद असली करियर? ईमानदार रहो।'},
+    {i:'📅',t:'प्रवेश',q:'आवेदन की तारीख और जरूरतें?'},
+  ]},
+  PT:{ph:'me pergunta...',badge:'seu copiloto do campus',brandT2:'Copiloto MEM/MIM',live:'live',
+  wt:'E aí 👋 <span class="accent">tudo bem?</span>',
+  wd:'Sou seu copiloto para os masters MEM & MIM na HS Pforzheim. Pergunta sobre módulos, profs, prazos ou entender o que estuda. Digita ou usa o microfone.',
+  ffLabel:'sabia',
+  ffText:'Pforzheim é a "Goldstadt" — produz 75% das joias e relógios da Alemanha.',
+  ct:'tenta isso',you:'Você',bot:'M/M',von:'voz on',voff:'voz off',listen:'ouvindo...',
+  cards:[
+    {i:'🧭',t:'estrutura',q:'Módulos no Semestre 1 e 2 do MEM?'},
+    {i:'👤',t:'professor',q:'Me fala do Prof. Volz — o que leciona, onde fica o escritório, horários'},
+    {i:'📋',t:'capstone',q:'Como exatamente o Capstone é avaliado?'},
+    {i:'💡',t:'conceito',q:'Explica a Matriz de Kraljic e como usar de verdade'},
+    {i:'🎯',t:'carreira',q:'Carreiras reais depois do MEM? Honestamente.'},
+    {i:'📅',t:'admissão',q:'Prazos e requisitos?'},
+  ]},
+  AR:{ph:'اسألني أي شيء...',badge:'مساعدك الجامعي',brandT2:'مساعد MEM/MIM',live:'مباشر',
+  wt:'مرحبا 👋 <span class="accent">شو الأخبار؟</span>',
+  wd:'أنا مساعدك لبرامج MEM/MIM الماجستير في HS Pforzheim. اسأل عن المقررات والأساتذة والمواعيد، أو افهم ما تدرسه.',
+  ffLabel:'هل تعلم',
+  ffText:'Pforzheim هي "مدينة الذهب" — تنتج 75% من المجوهرات والساعات في ألمانيا.',
+  ct:'جرّب هذه',you:'أنت',bot:'M/M',von:'صوت مفعّل',voff:'صوت متوقف',listen:'أستمع...',
+  cards:[
+    {i:'🧭',t:'الهيكل',q:'ما المقررات في الفصل 1 و 2 من MEM؟'},
+    {i:'👤',t:'الأستاذ',q:'حدّثني عن Prof. Volz — ماذا يدرّس، أين مكتبه، متى ساعاته'},
+    {i:'📋',t:'كابستون',q:'كيف يُقيَّم كابستون بالضبط؟'},
+    {i:'💡',t:'مفهوم',q:'اشرح مصفوفة كرالجيك وكيف تُستخدم فعلاً'},
+    {i:'🎯',t:'مهني',q:'مسارات حقيقية بعد MEM؟ كن صريحاً.'},
+    {i:'📅',t:'القبول',q:'مواعيد التقديم والمتطلبات؟'},
+  ]},
+  JA:{ph:'なんでも聞いて...',badge:'あなたのキャンパスコパイロット',brandT2:'MEM/MIM コパイロット',live:'live',
+  wt:'やあ 👋 <span class="accent">何かある？</span>',
+  wd:'HS PforzheimのMEM/MIM修士プログラムのコパイロットです。モジュール、教授、締切、あるいは学んでいる内容の理解を支援します。',
+  ffLabel:'知ってた',
+  ffText:'Pforzheimは「黄金都市」— ドイツの宝飾品と時計の75%がここで作られています。',
+  ct:'試して',you:'あなた',bot:'M/M',von:'音声ON',voff:'音声OFF',listen:'聞いています...',
+  cards:[
+    {i:'🧭',t:'構成',q:'MEM第1・2学期のモジュールは？'},
+    {i:'👤',t:'教授',q:'Volz教授について教えて — 担当科目、研究室、オフィスアワー'},
+    {i:'📋',t:'卒業PJ',q:'卒業プロジェクトの評価方法は？'},
+    {i:'💡',t:'概念',q:'クラルジックマトリクスの説明と実際の使い方'},
+    {i:'🎯',t:'キャリア',q:'MEM後の本当のキャリアは？正直に。'},
+    {i:'📅',t:'入学',q:'出願締切と必要書類は？'},
+  ]},
+  KO:{ph:'뭐든 물어봐...',badge:'당신의 캠퍼스 코파일럿',brandT2:'MEM/MIM 코파일럿',live:'live',
+  wt:'안녕 👋 <span class="accent">무슨 일이야?</span>',
+  wd:'HS Pforzheim MEM/MIM 석사 프로그램의 코파일럿입니다. 모듈, 교수, 마감일, 또는 공부하는 내용 이해를 도와드려요.',
+  ffLabel:'알고 있어',
+  ffText:'Pforzheim은 "황금의 도시" — 독일 보석과 시계의 75%가 여기서 만들어집니다.',
+  ct:'이거 해봐',you:'당신',bot:'M/M',von:'음성 ON',voff:'음성 OFF',listen:'듣고 있어요...',
+  cards:[
+    {i:'🧭',t:'구성',q:'MEM 1학기와 2학기 모듈은?'},
+    {i:'👤',t:'교수',q:'Volz 교수에 대해 알려줘 — 담당 강의, 사무실, 시간'},
+    {i:'📋',t:'캡스톤',q:'캡스톤은 정확히 어떻게 평가되나요?'},
+    {i:'💡',t:'개념',q:'크랄직 매트릭스 설명과 실제 사용법'},
+    {i:'🎯',t:'진로',q:'MEM 후 진짜 진로는? 솔직하게.'},
+    {i:'📅',t:'입학',q:'지원 마감일과 요건은?'},
+  ]},
+};
+
+const SR_LANG = {EN:'en-US',DE:'de-DE',FR:'fr-FR',ES:'es-ES',ZH:'zh-CN',HI:'hi-IN',PT:'pt-BR',AR:'ar-SA',JA:'ja-JP',KO:'ko-KR'};
+
+// ─── PERSONALITY ────────────────────────────────────
+const PERSONALITY = `You're the MEM/MIM Copilot — like a senior student who already finished the program and now helps incoming students. You're real, casual, and honest.
+
+HOW YOU TALK:
+- Casual and direct, like texting a friend who happens to be smart
+- Skip the corporate politeness. No "Great question!", no "I'd be happy to help!", no "That's an excellent point!"
+- If someone says "so what" or types something vague, don't explain back to them what they meant with bullet points. Just say "not much, what do you wanna know?" or "depends — about what?"
+- You can be slightly witty when it fits, but never forced
+- Use lowercase sometimes when it fits the casual tone — but not always, just naturally
+- If you don't know something, say so plainly: "I don't have that, you'd need to check with [prof]"
+- Don't end every answer with a follow-up question. Only ask when it's actually useful
+- It's fine to give one-line answers to one-line questions
+- No fake enthusiasm. No "Awesome!" or "Perfect!"`;
+
+// ─── PROFESSORS — DETAILED ──────────────────────────
+const PROFS = `=== PROFESSORS (verified from hs-pforzheim.de) ===
+
+PROF. DR. RER. POL. RAPHAEL VOLZ
+- Title: Professor of Applied Computer Science (Angewandte Informatik)
+- Office: T2.3.15
+- Office hours (Sprechstunde): Mondays 11:30-13:00 in T1.5.06 — book at tinyurl.com/termin-mit-prof-volz
+- Phone: (07231) 28-6692
+- Email: raphael.volz@hs-pforzheim.de
+- Website: volz.hs-pforzheim.de
+- Education:
+  - 2004: Dr. rer. pol. (PhD) — Universität Karlsruhe (now KIT), thesis "Web ontology reasoning with logic databases"
+  - 2001: Diplom Informatik — Universität Karlsruhe (now KIT)
+  - 1998: Vordiplom Medizinische Informatik — Universität Heidelberg / FH Heilbronn
+- Career:
+  - Since 2012: Professor at HS Pforzheim + Chairman of Volz Innovation GmbH
+  - 2009-2012: Managing Director of Nagago GmbH (built outdoor navigation app)
+  - 2008-2012: Founder & Managing Director, Volz Innovation GmbH
+  - 2004-2006: Management Consultant at Booz Allen Hamilton (now Booz&Co.)
+  - 2001-2004: Researcher at Institut AIFB, Universität Karlsruhe
+- Research: Business Information Systems, AI/ML maturity models, Smart City development, ontologies, cloud computing TCO
+- Teaches: Capstone Seminar (MWI10028), AI/Data Science, IT for Engineers
+- Citations: 8,000+ on Google Scholar (h-index ~40)
+
+PROF. DR. MORITZ A. PETER
+- Title: Tenured Full Professor of Procurement Management (Beschaffungsmanagement)
+- Office: T2.3.12
+- Office hours: Wednesdays 15:30-17:00
+- Phone: (07231) 28-6671
+- Email: moritz.peter@hs-pforzheim.de
+- Education:
+  - PhD (Dr. sc.) Logistics/Procurement — ETH Zürich (2011-2014)
+  - MBA — California Lutheran University, USA (2005-2006)
+  - Diplom-Kaufmann (Industrial Management) — Universität Mannheim (2001-2008)
+- Career:
+  - Before HS Pforzheim: Vice-president, head of campus, program director at International School of Management (ISM)
+  - 5 years procurement experience at Mercedes-Benz Cars & Vans / Daimler AG
+  - Management consultant at Porsche Consulting Group
+- Research: Strategic, operational, financial, contractual supply chain risk mitigation. Multiple best teacher awards.
+- Teaches: Strategic Procurement (MWI10022), Negotiations B2B (MWI10069), Capstone Seminar
+- Runs the annual Porsche Procurement Case Challenge with Mannheim + Pforzheim students at Porsche Zuffenhausen
+
+PROF. HARALD SCHNELL
+- Title: Professor of Financial Management & Controlling
+- Office: T1.3.28
+- Phone: 07231 28-6684
+- Email: harald.schnell@hs-pforzheim.de
+- Teaches: Financial Management & Control (MWI10014, Part 2 of Value Based Mgmt)
+- Course structure: Business Simulation (CEO of fictional Robert Wash Ltd) + workshops + 4-page seminar papers
+- Topics: target costing, life-cycle costing, budgeting, make vs buy, contribution margin, company valuation, IFRS
+
+PROF. DR. BINGWEN YAN
+- Title: Lehrbeauftragte (Lecturer) for KPI Management
+- Email: b.yan@lb.hs-pforzheim.de
+- Teaches: Management by Key Performance Indicators (MWI10015, Part 1 of Value Based Mgmt)
+- Course starts: 09 April 2026
+- Topics: KPI frameworks, balance sheet/P&L/cash flow analysis, EVA/ROI/ROCE/ROE, digital controlling, crisis management
+
+PROF. DR. RAINER WUNDERLICH
+- Title: Professor of Product Strategy & Development
+- Office: T1.5.26
+- Phone: 07231 28-6677
+- Email: rainer.wunderlich@hs-pforzheim.de
+- Teaches: Produktstrategie / Produktentwicklung (MWI10009) — Wednesdays 08:00-09:45 + Mondays
+- Course starts: 18 March 2026
+- Topics: Design Thinking, Business Model Canvas, Lean Canvas, product idea-to-business-model
+- Grading: Presentation 20% + Written 70% + Discussion 10%
+
+PROF. DR. LUDWIG MARTIN
+- Title: Professor of Research Methods
+- Office: T1.3.25
+- Office hours: Mondays 11:30-13:00
+- Phone: +49 7231 28 6186
+- Email: ludwig.martin@hs-pforzheim.de
+- Teaches: Research Methods (MWI10008) — 3 ECTS in English
+- Prereqs: English C1, Statistics 1
+- Assessment: Groups of ~2 → 20-30 min presentation + written paper
+- Topics: research paradigms, scientific ethics, plagiarism, AI in academic work
+
+PROF. DR. H. EMMERICH
+- Title: Professor of Industrial Production / Lean Management
+- Office: T1.3.23
+- Phone: 07231/28-6664
+- Email: herbert.emmerich@hs-pforzheim.de
+- Teaches: Lean Management (MWI10006) + Grundlagen der industriellen Produktion (MWI10061)
+- Schedule: Wednesdays 15:30-17:00
+- Assessment: Written Klausur
+- Topics: Lean philosophy, Arbeitsplanung, design for manufacturing, productivity tools
+
+DR. MICHAEL KRUTWIG
+- Title: External Lecturer, Emerging Technologies
+- Email: michael@krutwig.com
+- Teaches: Managing of Emerging Technologies (MWI10016) — 6 ECTS English, via MS Teams
+- 24 sessions: Emerging Tech Radar, Strategy, Cloud, IoT, Blockchain, AI, Additive Manufacturing, Group work
+
+PROF. DR. ANSGAR KÜHN
+- Title: Program Director MEM & MIM
+- Phone: 07231-286490
+- Teaches: Innovations-/Forschungsprojekt (MWI10010), Cross Border Cooperation (MWI10019)
+- Oversees: Leadership module, Capstone, Master Thesis
+
+PROF. DR. BERNHARD KÖLMEL
+- Title: Professor, Director of Management Neuer Technologien module
+- Teaches: Organisatorische Konzepte (MWI10018)
+- Research collaborator with Volz on AI maturity models and Smart City development
+
+PROF. DR. THOMAS SCHUSTER
+- Teaches: Technische Konzepte in Management Neuer Technologien (MWI10017)
+- Research collaborator with Volz on cloud computing TCO and AI maturity models
+
+PROF. DR. REBECCA BULANDER
+- Teaches: Geschäftsprozessmanagement (MWI10021) — German — BPMN, BPM, process mining
+- Also co-teaches Forschungsmethoden in some semesters
+
+PROF. DR. HENNING HINDERER
+- Title: Director of Forschungsmethoden & Innovation module
+- Co-teaches Produktstrategie alongside Prof. Wunderlich
+
+DR. DIETER LEDERER
+- Teaches: Führung (Leadership) in MWI10002 — leadership styles, values, communication, body language
+
+SVEN BEMMÉ
+- Teaches: Führung in Projekten (MWI10003) — project management, conflict, moderation
+
+DR. DELANG
+- Teaches: Produktionsstrategie (MWI10005) — Value Stream Mapping, BPM, Value Engineering
+
+PROF. DR. GUY FOURNIER
+- Teaches: Future Mobility elective (BAE5028) — 3 ECTS German
+- Email: guy.fournier@hs-pforzheim.de
+- Phone: 07231 28-6546
+- Block dates: 08/15/18/19 June 2026
+- Topics: EVs, automated vehicles (SAE levels, LiDAR/V2X), MaaS, AVENUE & ULTIMO projects
+
+VOLKER WINTERGERST
+- Teaches: Unternehmensrestrukturierung elective (BAE5153) — 3 ECTS German
+- Email: Volker.Wintergerst@wintergerst.com
+- Phone: +49 171 7666633
+- Assessment: Presentation 30% + Written 50% + Discussion 20%
+- Topics: Restructuring, pre-insolvency, Distressed M&A, automotive crises`;
+
+const KB = `=== HS PFORZHEIM MEM & MIM MASTER PROGRAMS (SPO 2024) ===
+
+ABOUT THE UNIVERSITY:
+HS Pforzheim is in Pforzheim, Baden-Württemberg. Known as the "Goldstadt" (Gold City) — 75% of all German jewellery and watches are made here. Founded 1877 originally for the jewellery industry. Now ~6,200 students across 3 schools: Design, Engineering, Business. The Business School has AACSB accreditation (only ~11 in Germany).
+
+PROGRAMS:
+MEM — Engineering and Management (M.Sc.) | Director: Prof. Dr. Ansgar Kühn | 3 semesters
+  Apply: WS26/27 by 15 June | Winter intake by 15 Jan | campus.hs-pforzheim.de
+  Features: small groups 20-25, electives from all 3 faculties, Double Degree with Taiwan Tech, optional semester abroad
+  Real career paths: strategic procurement (Daimler/Porsche/Bosch), product management, project management, production planning, controlling, consulting
+
+MIM — Industrial Management (M.Sc.) | English Track available | Director: Prof. Dr. Ansgar Kühn
+  Content focus: Technology & Innovation, Leadership, Process & Data Management, Networked Systems & AI
+
+GRADING SCALE: 1.0=Sehr gut (excellent) | 2.0=Gut (good) | 3.0=Befriedigend (satisfactory) | 4.0=Ausreichend (pass) | 5.0=Fail. UPL = pass/fail (no grade).
+1 ECTS ≈ 25-30 work hours. Exam types: PLH = paper (20-40pp), PLK = written exam, PLP = project (40-60pp), PLR = presentation, PLT = thesis (70-100pp).
+
+PROGRAM LEARNING OUTCOMES: 1. Responsible Leadership 2. Creative Problem-Solving 3. Research Competence 4. Interdisciplinary Engineering+Business Work
+
+=== MODULE OVERVIEW SPO 2024 ===
+M1 Leadership (MWI10001) Sem1 | 6 ECTS | Lederer + Bemmé
+M2 Produktionsstrategie (MWI10004) Sem1 | 6 ECTS | Delang + Emmerich | PLK 90min
+M3 Forschungsmethoden & Innovation (MWI10007) Sem1 | 6 ECTS | Martin + Wunderlich/Hinderer
+M4 Innovations-/Forschungsprojekt (MWI10010) Sem1/2 | 9 ECTS | Groups of 4
+M5 Value Based Management (MWI10013) Sem2 | 6 ECTS | Schnell (Fin Mgmt) + Yan (KPI) | English
+M6 Management Neuer Technologien (MWI10016) Sem2 | 6 ECTS | Kölmel + Schuster | English | IoT/Cloud
+M7 Cross Border Cooperation (MWI10019) Sem2 | 6 ECTS | Kühn | Company project + excursion
+M8 Managing the Value Chain (MWI10020) Sem1/2 | 6 ECTS | Bulander (BPM) + Peter (Procurement)
+M9 Electives (MWI10023) Sem1/2 | 9 ECTS | 3 courses from any of the 3 faculties
+M10 Capstone (MWI10027) Sem3 | 6 ECTS | Prereq: ALL courses | Volz + Peter | Team participation 60% + Presentations 40% | Full attendance required
+M11 Master-Thesis (THE6880) Sem3 | 24 ECTS | 6 months | 70-100 pages
+
+=== SUBJECT CONCEPTS (for teaching, not just listing) ===
+You can actually TEACH these — explain them clearly with examples like a tutor would.
+
+PROCUREMENT (Peter): Kraljic Matrix categorizes purchases on two axes — profit impact (low/high) × supply risk (low/high). Four quadrants: Non-critical (low/low — automate), Leverage (high/low — exploit power), Bottleneck (low/high — ensure supply), Strategic (high/high — partner deeply). Other: BATNA, make-or-buy, TCO, supplier portfolio, e-sourcing, supplier development, global sourcing, CSR in procurement.
+
+NEGOTIATION (Peter, MWI10069): BATNA = Best Alternative To Negotiated Agreement (your walk-away). ZOPA = Zone of Possible Agreement. Fisher/Ury principled negotiation: separate people from problem, focus on interests not positions, invent options for mutual gain, insist on objective criteria. Distributive (zero-sum) vs Integrative (win-win).
+
+LEAN/PRODUCTION (Emmerich, MWI10006): 7 wastes "TIMWOOD" — Transport, Inventory, Motion, Waiting, Over-production, Over-processing, Defects. Value Stream Mapping, Kanban, JIT, Kaizen, fractal factory, production types (job/batch/mass/continuous), OEE = Availability × Performance × Quality.
+
+FINANCE/CONTROLLING (Schnell, MWI10014): EVA = NOPAT − (WACC × Capital). ROI, ROCE, ROE, CFROI. Target costing (work backwards from price), life-cycle costing, contribution margin, budgeting types, IFRS vs US-GAAP differences, DCF for company valuation.
+
+KPI MANAGEMENT (Yan, MWI10015): Balanced Scorecard (4 perspectives: Financial/Customer/Internal Process/Learning), leading vs lagging indicators, P&L/balance sheet/cash flow analysis, liquidity/solvency ratios, digital controlling with BI/ERP, crisis management.
+
+BPM (Bulander, MWI10021): BPMN 2.0 notation (events/activities/gateways/flows). Process analysis methods, process mining (van der Aalst's algorithms — Alpha, Heuristic), as-is to to-be optimization.
+
+EMERGING TECH (Krutwig, MWI10016): Tech Radar concept (Adopt/Trial/Assess/Hold), IoT architecture (devices/connectivity/platform/applications), Cloud models (IaaS/PaaS/SaaS), Blockchain/DLT consensus mechanisms, ML basics (supervised/unsupervised/reinforcement), Additive Manufacturing.
+
+LEADERSHIP (Lederer/Bemmé, MWI10001): Transformational vs transactional leadership, Hersey-Blanchard situational leadership, conflict management styles (avoiding/accommodating/competing/compromising/collaborating), project leadership specifics, Hofstede's 6 cultural dimensions, Kotter's 8-step change model.
+
+RESEARCH METHODS (Martin, MWI10008): Paradigms — positivism (quantitative, hypotheses, large N) vs interpretivism (qualitative, meaning, small N). Mixed methods. Research design (descriptive/explanatory/exploratory). Citation standards (APA/Harvard), plagiarism rules, ethical AI use in academic work.
+
+INNOVATION/PRODUCT (Wunderlich, MWI10009): Design Thinking 5 stages — Empathise → Define → Ideate → Prototype → Test. Business Model Canvas 9 blocks. Lean Startup (Build-Measure-Learn). Value Proposition Canvas.
+
+When students ask about a CONCEPT (not just "who teaches X"), actually explain it. Give a 1-line definition, then a concrete example, then say which module covers it. Don't just rattle off bullet points — make it land.
+
+=== KEY CONTACTS QUICK REFERENCE ===
+Volz (Capstone/AI/CS): raphael.volz@hs-pforzheim.de | (07231) 28-6692 | Office T2.3.15 | Sprechstunde Mo 11:30-13:00 (T1.5.06)
+Peter (Procurement/Negotiations/Capstone): moritz.peter@hs-pforzheim.de | (07231) 28-6671 | T2.3.12 | Wed 15:30-17:00
+Schnell (Financial Mgmt): harald.schnell@hs-pforzheim.de | 07231 28-6684 | T1.3.28
+Yan (KPI): b.yan@lb.hs-pforzheim.de
+Wunderlich (Produktstrategie): rainer.wunderlich@hs-pforzheim.de | 07231 28-6677 | T1.5.26
+Martin (Research Methods): ludwig.martin@hs-pforzheim.de | +49 7231 28 6186 | T1.3.25
+Emmerich (Lean/Production): herbert.emmerich@hs-pforzheim.de | 07231/28-6664 | T1.3.23
+Krutwig (Emerging Tech): michael@krutwig.com
+Kühn (Program Director): 07231-286490
+Fournier (Future Mobility elective): guy.fournier@hs-pforzheim.de | 07231 28-6546
+Wintergerst (Restrukturierung elective): Volker.Wintergerst@wintergerst.com | +49 171 7666633
+
+${PROFS}`;
+
+let lang='EN', history=[], busy=false, voiceOut=true, recognition=null, listening=false, abortCtrl=null;
+const t = k => L[lang]?.[k] ?? L.EN[k] ?? k;
+
+function setLang(){
+  lang=document.getElementById('ls').value;
+  document.documentElement.lang=lang.toLowerCase();
+  document.body.dir=lang==='AR'?'rtl':'ltr';
+  document.getElementById('inp').placeholder=t('ph');
+  document.getElementById('liveLabel').textContent=t('live');
+  document.getElementById('brandT2').textContent=t('brandT2');
+  document.getElementById('voiceLabel').textContent=voiceOut?t('von'):t('voff');
+  document.getElementById('listenText').textContent=t('listen');
+  const w=document.getElementById('wlc');
+  if(w){
+    document.getElementById('wbadge').textContent=t('badge');
+    document.getElementById('wt').innerHTML=t('wt');
+    document.getElementById('wd').textContent=t('wd');
+    document.getElementById('ffLabel').textContent=t('ffLabel');
+    document.getElementById('ffText').textContent=t('ffText');
+    document.getElementById('wct').textContent=t('ct');
+    renderCards();
+  }
+}
+
+function renderCards(){
+  const c=document.getElementById('wg'); if(!c)return; c.innerHTML='';
+  (t('cards')||[]).forEach(card=>{
+    const d=document.createElement('div'); d.className='card'; d.onclick=()=>ask(card.q);
+    d.innerHTML=`<div class="card-head"><span class="card-ico">${card.i}</span><span class="card-tag">${card.t}</span></div><div class="card-q">${card.q}</div>`;
+    c.appendChild(d);
+  });
+}
+
+function sysPrompt(){
+  return `${PERSONALITY}
+
+LANGUAGE: Match the user's language exactly. German question → German answer. Always.
+
+ANSWER LENGTH:
+- Vague/short input ("so what", "hi", "lol") → respond in kind. ONE short line. No bullet points back at them. No "let me clarify" lists.
+- One-fact question ("who teaches X") → one sentence with the answer. Done.
+- Simple question → 2-4 sentences max.
+- Concept explanation → only as long as needed. Give the idea, an example, mention the module.
+- Never artificially pad. Cut what's not asked for.
+
+YOU KNOW:
+1. The MEM/MIM programs at HS Pforzheim — structure, modules, deadlines, grading
+2. Each professor's name, office, hours, email, what they teach, their background
+3. The actual subject concepts (Kraljic, BATNA, EVA, Lean, BPMN, etc.) — you can teach them
+4. Some local color about Pforzheim itself (the Goldstadt thing)
+
+If something's not in the data below, say so plainly. Don't make up office numbers, emails, or facts.
+
+${KB}`;
+}
+
+async function send(){
+  if(busy)return;
+  const inp=document.getElementById('inp');
+  const text=inp.value.trim(); if(!text)return;
+  inp.value=''; rsz(inp);
+  const w=document.getElementById('wlc'); if(w) w.remove();
+  addMsg('u',text);
+  history.push({role:'user',content:text});
+  busy=true;
+  document.body.classList.add('processing');
+  abortCtrl = new AbortController();
+  const tid=addTyping();
+  try{
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:MODEL,max_tokens:1024,system:sysPrompt(),messages:history}),
+      signal: abortCtrl.signal});
+    const data=await res.json();
+    removeTyping(tid);
+    if(data.error){ addMsg('b','⚠ '+(data.error.message||JSON.stringify(data.error))); }
+    else{
+      const reply=data?.content?.[0]?.text;
+      if(reply){ addMsg('b',reply); history.push({role:'assistant',content:reply}); }
+      else { addMsg('b','⚠ empty response, try again'); }
+    }
+  }catch(e){
+    removeTyping(tid);
+    if(e.name === 'AbortError'){ addMsg('b','stopped'); }
+    else { addMsg('b','⚠ '+e.message); }
+  }
+  busy=false;
+  document.body.classList.remove('processing');
+  abortCtrl = null;
+}
+
+function halt(){
+  if(abortCtrl){ abortCtrl.abort(); }
+  if(window.speechSynthesis){ window.speechSynthesis.cancel(); }
+}
+
+function ask(q){ document.getElementById('inp').value=q; send(); }
+
+let tc=0;
+function addTyping(){
+  const id='tp'+(++tc), c=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className='msg-row'; row.id=id;
+  row.innerHTML=`<div class="msg-inner b"><div class="avatar">M/M</div><div class="bubble-wrap"><div class="bubble"><div class="dots"><span></span><span></span><span></span></div></div></div></div>`;
+  c.appendChild(row); c.scrollTop=c.scrollHeight; return id;
+}
+function removeTyping(id){ const e=document.getElementById(id); if(e) e.remove(); }
+
+function addMsg(role,text){
+  const c=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className='msg-row';
+  const tools = role==='b'
+    ? `<div class="msg-tools"><button class="tool-btn" onclick="toggleSpeak(this)">🔊 listen</button></div>` : '';
+  row.innerHTML=`<div class="msg-inner ${role}"><div class="avatar">${role==='u'?'YOU':'M/M'}</div><div class="bubble-wrap"><div class="bubble">${fmt(text)}</div>${tools}</div></div>`;
+  c.appendChild(row); c.scrollTop=c.scrollHeight;
+  if(role==='b'){
+    const bubble = row.querySelector('.bubble');
+    bubble.dataset.raw=text;
+    if(voiceOut){ setTimeout(()=>speak(text), 200); }
+  }
+}
+
+function fmt(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\\*\\*(.*?)\\*\\*/g,'<strong>$1</strong>')
+    .replace(/\\*(.*?)\\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^- (.+)$/gm,'• $1')
+    .replace(/\`([^\`]+)\`/g,'<code>$1</code>')
+    .replace(/\\n/g,'<br>');
+}
+
+// ─── VOICE OUTPUT (browser TTS — most reliable free option) ─────
+let voices=[];
+function loadVoices(){
+  voices = window.speechSynthesis.getVoices();
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function pickVoice(){
+  if(!voices.length) loadVoices();
+  const code = SR_LANG[lang] || 'en-US';
+  const base = code.split('-')[0];
+  // Prefer high-quality / male voices for Volz feel
+  const priorities = [
+    v => v.name.includes('Google') && v.lang===code && /male/i.test(v.name),
+    v => v.name.includes('Microsoft') && v.lang===code && /male|Daniel|George|David/i.test(v.name),
+    v => v.lang===code,
+    v => v.lang.startsWith(base) && /male|Daniel|George|David/i.test(v.name),
+    v => v.lang.startsWith(base),
+    v => v.lang.startsWith('en'),
+  ];
+  for(const p of priorities){
+    const found = voices.find(p);
+    if(found) return found;
+  }
+  return voices[0];
+}
+
+let currentUtterance = null;
+function speak(text){
+  if(!voiceOut) return;
+  window.speechSynthesis.cancel();
+  const clean = text
+    .replace(/\\*\\*(.*?)\\*\\*/g,'$1')
+    .replace(/\\*(.*?)\\*/g,'$1')
+    .replace(/#{1,3}\\s/g,'')
+    .replace(/\`([^\`]+)\`/g,'$1')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/&[a-z]+;/g,' ')
+    .replace(/\\s+/g,' ')
+    .trim();
+  if(!clean) return;
+  const u = new SpeechSynthesisUtterance(clean);
+  const v = pickVoice();
+  if(v) u.voice = v;
+  u.rate = 0.95;
+  u.pitch = 0.92;
+  u.volume = 1;
+  currentUtterance = u;
+  // Workaround for Chrome bug where speech cuts off
+  let resumeTimer = null;
+  u.onstart = () => {
+    // Chrome bug: speechSynthesis pauses after ~15s. Keep it alive.
+    resumeTimer = setInterval(() => {
+      if(window.speechSynthesis.speaking && !window.speechSynthesis.paused){
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 8000);
+  };
+  u.onend = () => { if(resumeTimer) clearInterval(resumeTimer); currentUtterance = null; };
+  u.onerror = () => { if(resumeTimer) clearInterval(resumeTimer); currentUtterance = null; };
+  window.speechSynthesis.speak(u);
+}
+
+function toggleSpeak(btn){
+  const bubble = btn.closest('.bubble-wrap').querySelector('.bubble');
+  const raw = bubble.dataset.raw || bubble.textContent;
+  if(window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();
+    btn.innerHTML = '🔊 listen';
+    btn.classList.remove('active');
+  } else {
+    speak(raw);
+    btn.innerHTML = '⏹ stop';
+    btn.classList.add('active');
+    const check = setInterval(() => {
+      if(!window.speechSynthesis.speaking){
+        btn.innerHTML = '🔊 listen';
+        btn.classList.remove('active');
+        clearInterval(check);
+      }
+    }, 500);
+  }
+}
+
+function toggleVoiceOut(){
+  voiceOut = !voiceOut;
+  document.getElementById('voiceToggle').classList.toggle('on', voiceOut);
+  document.getElementById('voiceLabel').textContent = voiceOut ? t('von') : t('voff');
+  if(!voiceOut) window.speechSynthesis.cancel();
+}
+
+// ─── VOICE INPUT ────────────────────────────────────
+function toggleMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Voice input only works in Chrome'); return; }
+  if(listening){ if(recognition) recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = SR_LANG[lang] || 'en-US';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+  listening = true;
+  document.getElementById('micBtn').classList.add('listening');
+  document.getElementById('listenBanner').classList.add('show');
+  recognition.onresult = e => {
+    let txt = '';
+    for(let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+    document.getElementById('inp').value = txt;
+    rsz(document.getElementById('inp'));
+  };
+  recognition.onend = () => {
+    listening = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('listenBanner').classList.remove('show');
+    const txt = document.getElementById('inp').value.trim();
+    if(txt) send();
+  };
+  recognition.onerror = () => {
+    listening = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('listenBanner').classList.remove('show');
+  };
+  recognition.start();
+}
+
+function onKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    if(!busy) send();
+  }
+  if(e.key === 'Escape'){ halt(); }
+}
+
+function rsz(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+setLang();
+</script>
+</body>
+</html>
